@@ -1,93 +1,96 @@
 # Agent Runner — Agente de Desenvolvimento Autônomo 🚀
 
-**Agent Runner** é um motor de execução agentivo projetado para transformar requisitos de software em aplicações completas e funcionais, simulando o fluxo de trabalho de uma equipe real de engenharia de software de alto nível.
+**Agent Runner** é um motor de execução agentivo projetado para transformar requisitos de software em aplicações completas e funcionais, simulando o fluxo de trabalho de uma equipe real de engenharia de software — e aprendendo empiricamente com cada projeto construído.
 
-## 🧠 O Conceito: Memória Viva e Multi-Agent Team
+## 🧠 O Conceito: RALPH LOOP
 
-Diferente de assistentes de codificação convencionais, o Agent Runner opera sob o conceito de **Memória Viva**. Ele não apenas executa tarefas, mas aprende com cada erro, refatoração e decisão arquitetural, registrando esse conhecimento em uma base de memória persistente que é consultada a cada novo ciclo.
+O Agent Runner opera sob o **RALPH LOOP** — um ciclo de aprendizado empírico inspirado na forma como desenvolvedores humanos crescem na carreira:
 
-Para garantir a qualidade e robustez dos projetos, o Agent Runner divide sua inteligência em papéis distintos:
+```
+PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tarefas → LEARN GLOBAL → próximo projeto
+```
 
-| Papel | Responsabilidade |
-| :--- | :--- |
-| **🤵 Analista de Requisitos** | Transforma ideias em PRDs detalhados, define fluxos de usuário e critérios de aceite. |
-| **🏛️ Arquiteto de Software** | Define a stack tecnológica, modelagem de dados (Schema) e estrutura de diretórios. |
-| **🎨 Designer UI/UX** | Cria o Design System, define paletas de cores, tipografia e garante layouts modernos e "Premium". |
-| **💻 Desenvolvedor Sênior** | Implementa as funcionalidades seguindo rigorosamente o PRD e a arquitetura definida. |
-| **🧪 QA Engineer** | Garante que nada quebre através de testes E2E (Playwright) e validação de requisitos. |
+Diferente de assistentes convencionais, o Agent Runner:
+- **Aprende** com cada erro e decisão técnica
+- **Persiste** esse conhecimento em uma memória acumulada (`workspace/memory/agent-brain.md`)
+- **Melhora** a cada projeto — automaticamente, sem intervenção humana
+- **Funciona** mesmo com modelos de IA com menor capacidade, graças a tarefas atômicas e auto-suficientes
 
----
+## 👥 O Time (Multi-Agent Roles)
 
-## 🛠️ Como Funciona o Agent Runner
+| Papel | Arquivo | Responsabilidade |
+|-------|---------|-----------------|
+| 🤵 Analista | `analyst.md` | Transforma ideias em PRDs detalhados, deduz features implícitas |
+| 🏛️ Arquiteto | `architect.md` | Define stack, schema de dados, estrutura de pastas |
+| 🎨 Designer | `designer.md` | Cria Design System, paleta, tipografia, layouts |
+| 💻 Desenvolvedor | `dev.md` | Implementa features com autonomia extrema |
+| 🧪 QA | `qa.md` | Testa após cada feature, garante que nada quebra |
+| 📋 Manager | `manager.md` | Consolida contexto quando a janela de contexto satura |
+| 🧠 Learner | `learner.md` | Extrai padrões e atualiza a memória do agente |
 
-O ecossistema busca a automação total através de um pipeline estruturado:
+## 🔄 Como Funciona
 
-1.  **Planejamento**: O agente assume o papel de Analista e Arquiteto para planejar o projeto no diretório `workspace/`.
-2.  **Design**: O Designer define o sistema visual em `globals.css` e tokens de design.
-3.  **Execução**: O Desenvolvedor implementa a lógica em `apps/[projeto]`.
-4.  **Verificação**: O QA executa testes após cada entrega de feature.
-5.  **Aprendizado**: Lições aprendidas são salvas em `workspace/memory/` para evitar erros futuros.
+### Fase 1: PLAN (única por projeto)
+O agente assume os papéis de Analista → Arquiteto → Designer e produz:
+- `workspace/PRD.md` — documento completo de requisitos
+- `workspace/requirements/[projeto].md` — lista detalhada de RFs/RNFs
+- `workspace/prd.json` — tarefas atômicas numeradas, cada uma com instructions auto-suficientes
 
----
+### Fase 2: EXECUTE → VERIFY → LEARN (loop por tarefa)
+Para cada tarefa do `prd.json`:
+1. **Dev implementa** seguindo as `instructions` da tarefa
+2. **QA verifica** compilação, lint e testes E2E
+3. **Learner registra** padrões aprendidos
+4. Commit automático e próxima tarefa
 
-## 🚀 Como Executar
+### Fase 3: LEARN GLOBAL (fim do projeto)
+O Learner faz uma análise completa do projeto e atualiza `workspace/memory/agent-brain.md` — a memória que persiste entre todos os projetos.
 
-O agente pode ser invocado através de prompts específicos ou scripts de automação.
+## 🚀 Como Usar
 
-### Comando Principal: `/agent-runner`
-
-Dentro do ambiente configurado (ex: Windsurf ou Cursor), use o comando:
+### Via comando `/agent-runner`
 ```text
 /agent-runner: Crie um [descreva seu projeto aqui]
 ```
 
-### via scripts
-Você também pode rodar o motor manualmente:
+### Via scripts
 ```bash
 ./agent/scripts/agent_run.sh
 ```
 
----
-
-## 📁 Estrutura do Projeto
+## 📁 Estrutura
 
 ```text
 agent-runner/
-├── agent/                  # Core do Agente
-│   ├── roles/             # Definição dos papéis (Analista, Dev, QA, etc.)
-│   ├── prompts/           # Prompts base para Planejamento e Execução
-│   └── scripts/           # Scripts de automação e checagens
-├── apps/                   # Projetos gerados pelo Agent Runner (Monorepo)
-├── workspace/              # Inteligência e Documentação de Trabalho
-│   ├── requirements/      # Documentos de requisitos específicos por projeto
-│   ├── memory/             # Base de conhecimento e lições aprendidas
-│   └── PRD.md              # Requisitos do projeto atual
-└── .gitignore              # Configurado para compartilhar o motor, protegendo os dados
+├── agent/
+│   ├── roles/              # Papéis do time (analyst, architect, dev, qa, designer, manager, learner)
+│   ├── prompts/            # Prompts do RALPH LOOP (instructions, plan, execute, learn, resume)
+│   └── scripts/            # Scripts de automação
+├── apps/                   # Projetos gerados (monorepo)
+├── workspace/
+│   ├── memory/
+│   │   ├── agent-brain.md  # ← MEMÓRIA DO AGENTE (cross-project, acumulativa)
+│   │   ├── global.md       # Regras globais do ambiente
+│   │   ├── [projeto].md    # Memória por projeto
+│   │   └── snapshots/      # Snapshots de sessão
+│   ├── requirements/       # Requisitos detalhados por projeto
+│   └── PRD.md              # PRD do projeto atual
 ```
 
-## 🔋 Requisitos Recomendados
+## 🔋 Requisitos
 
-- **IDE**: Windsurf, Antigravity.
-- **Runtime**: Node.js 18+ e Yarn.
-
----
+- **IDE**: Windsurf, Cursor, ou qualquer IDE com suporte a agentes IA
+- **Runtime**: Node.js 18+ e Yarn
+- **IA**: Funciona com qualquer modelo — otimizado para modelos com menor capacidade
 
 ## 🤝 Contribuição e Sabedoria Coletiva
 
-O Agent Runner é mais do que código; é um **Organismo Coletivo**. Ele foi projetado para aprender e evoluir. Se você usou o agente e ele acumulou novos conhecimentos em sua "Memória Viva", encorajamos você a compartilhar essa sabedoria de volta.
+O Agent Runner é um **Organismo Coletivo**. Se o agente acumulou conhecimento valioso em `workspace/memory/agent-brain.md` durante o uso, encorajamos compartilhar essa sabedoria de volta.
 
-Veja como colaborar no arquivo [CONTRIBUTING.md](./CONTRIBUTING.md).
-
----
+Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para saber como contribuir.
 
 ## 📝 Licença
 
-Este projeto é licenciado sob a **GNU AGPLv3 (Affero General Public License)**. 
-
-Diferente de licenças comuns, a AGPLv3 garante que:
-1.  **Melhorias fiquem abertas**: Se você modificar o motor do Agent Runner e distribuí-lo (mesmo via rede), deve compartilhar o código-fonte.
-2.  **Evolução Coletiva**: Incentivamos que tanto o código quanto a "sabedoria" acumulada na memória do agente permaneçam acessíveis à comunidade.
+**GNU AGPLv3** — Melhorias ficam abertas. Evolução coletiva.
 
 Copyright (c) 2026 ronerog
-
-> **Nota**: O Agent Runner está em constante evolução. Cada projeto concluído, por qualquer usuário, o torna um desenvolvedor mais experiente se a memória for compartilhada.

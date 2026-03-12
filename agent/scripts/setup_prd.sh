@@ -1,19 +1,44 @@
 #!/bin/bash
-# setup_prd.sh - Converte PRD.md em prd.json (tarefas atômicas)
+# setup_prd.sh - Converte PRD.md em prd.json com tarefas atômicas
 
 if [ ! -f "workspace/PRD.md" ]; then
-    echo "Erro: workspace/PRD.md não encontrado. Por favor, gere o documento primeiro."
+    echo "Erro: workspace/PRD.md não encontrado. Gere o PRD primeiro."
     exit 1
 fi
 
-echo "Iniciando conversão do PRD para lista de tarefas atômicas..."
-echo "---"
+echo "=== Agent Runner — Convertendo PRD em Tarefas Atômicas ==="
+echo ""
 echo "[AGENT-INSTRUCTION] ATENÇÃO AGENTE IA:"
-echo "[AGENT-INSTRUCTION] 1. Leia atentamente o conteúdo de 'workspace/PRD.md'."
-echo "[AGENT-INSTRUCTION] 2. Quebre a implementação em uma lista de tarefas pequenas e consecutivas."
-echo "[AGENT-INSTRUCTION] 3. Crie no arquivo 'workspace/prd.json' um array JSON com as tarefas."
-echo "[AGENT-INSTRUCTION] Estrutura esperada de cada objeto no JSON:"
-echo '[{"id": 1, "task": "Setup monorepo structure in /apps", "status": "pending"}]'
-echo "[AGENT-INSTRUCTION] Por favor, gere ou atualize o 'workspace/prd.json' agora mesmo."
-echo "---"
-echo "Aguardando o agente criar o prd.json..."
+echo ""
+echo "[AGENT-INSTRUCTION] Leia 'workspace/PRD.md' e 'workspace/requirements/[projeto].md'."
+echo "[AGENT-INSTRUCTION] Também leia 'workspace/memory/agent-brain.md' para evitar padrões problemáticos conhecidos."
+echo ""
+echo "[AGENT-INSTRUCTION] Gere 'workspace/prd.json' com tarefas ATÔMICAS (1 tarefa = 1 arquivo ou 1 comando)."
+echo ""
+echo "[AGENT-INSTRUCTION] FORMATO OBRIGATÓRIO de cada tarefa:"
+echo '[{'
+echo '  "id": 1,'
+echo '  "role": "dev",'
+echo '  "task": "Verbo + objeto conciso",'
+echo '  "file": "apps/[projeto]/caminho/exato/arquivo.ext",'
+echo '  "instructions": "Instrução COMPLETA e AUTO-SUFICIENTE — inclua o que criar, qual lógica, quais imports, qual comando. Escreva como se a IA não tivesse lido nenhum outro arquivo.",'
+echo '  "done_when": "Critério OBJETIVO: arquivo existe / comando roda sem erro / rota retorna 200",'
+echo '  "rf": ["RF01"],'
+echo '  "status": "pending"'
+echo '}]'
+echo ""
+echo "[AGENT-INSTRUCTION] SEQUÊNCIA OBRIGATÓRIA:"
+echo "[AGENT-INSTRUCTION] 1. Setup do projeto (SEMPRE primeira)"
+echo "[AGENT-INSTRUCTION] 2. Dependências (yarn add)"
+echo "[AGENT-INSTRUCTION] 3. Schema de dados (Prisma)"
+echo "[AGENT-INSTRUCTION] 4. Configurações (env, next.config, tailwind)"
+echo "[AGENT-INSTRUCTION] 5. Design System (globals.css, layout.tsx, componentes base)"
+echo "[AGENT-INSTRUCTION] 6. Backend (server actions, API routes, auth)"
+echo "[AGENT-INSTRUCTION] 7. Páginas/telas (uma por tarefa)"
+echo "[AGENT-INSTRUCTION] 8. Integrações externas"
+echo "[AGENT-INSTRUCTION] 9. Testes E2E"
+echo "[AGENT-INSTRUCTION] 10. Documentação (SEMPRE última)"
+echo ""
+echo "[AGENT-INSTRUCTION] Gere ou atualize 'workspace/prd.json' agora."
+echo ""
+echo "Aguardando o agente gerar o prd.json..."

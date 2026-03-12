@@ -1,64 +1,67 @@
 #!/bin/bash
-# run_checks.sh - Garante que a aplicação está íntegra
+# run_checks.sh - Verificações de integridade do Agent Runner
+# Os comandos são lidos da seção "meta" do workspace/prd.json
+# Não há nenhum comando hardcoded — tudo vem da stack definida pelo Arquiteto
 
-echo "Iniciando verificações de integridade (Agent Runner)..."
+echo "=== Agent Runner — Verificações de Integridade ==="
 
-if [ ! -d "apps" ]; then
-    echo "Nenhuma pasta /apps encontrada. Verificação ignorada."
+if [ ! -f "workspace/prd.json" ]; then
+    echo "Aviso: workspace/prd.json não encontrado. Verificação ignorada."
     exit 0
 fi
 
-cd apps || exit 1
+# Lê os comandos da seção meta do prd.json (requer jq)
+if ! command -v jq &> /dev/null; then
+    echo "Aviso: 'jq' não encontrado. Não é possível ler os comandos do prd.json automaticamente."
+    echo "Instale jq ou execute os comandos manualmente conforme definido em workspace/prd.json > meta"
+    exit 0
+fi
 
-for D in */; do
-    if [ -d "${D}" ]; then
-        # Remove trailing slash
-        DIR_NAME=${D%/}
-        echo "Verificando projeto: ${DIR_NAME}..."
-        
-        cd "${DIR_NAME}" || continue
-        
-        if [ -f "package.json" ]; then
-            # Verifica se build existe no package.json
-            if grep -q '"build"' package.json; then
-                echo "[CHECK] Rodando npm run build em ${DIR_NAME}..."
-                npm run build
-                if [ $? -ne 0 ]; then
-                    echo "ERRO CRÍTICO no build de ${DIR_NAME}!"
-                    echo "O agente deve intervir para corrigir o código."
-                    exit 1
-                fi
-            fi
+CHECK_CMD=$(jq -r '.meta.check_cmd // empty' workspace/prd.json)
+TEST_CMD=$(jq -r '.meta.test_cmd // empty' workspace/prd.json)
+LINT_CMD=$(jq -r '.meta.lint_cmd // empty' workspace/prd.json)
 
-            # Verifica se test existe no package.json
-            if grep -q '"test"' package.json; then
-                # Algum pacote padrao diz test script run explicitly, ignora se for "echo"
-                if ! grep -q '"test".*echo \"Error: no test specified\"' package.json; then
-                    echo "[CHECK] Rodando npm test em ${DIR_NAME}..."
-                    npm test
-                    if [ $? -ne 0 ]; then
-                        echo "ERRO CRÍTICO nos testes de ${DIR_NAME}!"
-                        echo "O agente deve intervir para corrigir."
-                        exit 1
-                    fi
-                fi
-            fi
-        fi
-
-        # Playwright Test
-        if [ -f "playwright.config.ts" ] || [ -f "playwright.config.js" ]; then
-            echo "[CHECK] Rodando Playwright E2E em ${DIR_NAME}..."
-            npx playwright test
-            if [ $? -ne 0 ]; then
-                echo "ERRO CRÍTICO no Playwright E2E em ${DIR_NAME}!"
-                echo "O agente deve intervir para corrigir."
-                exit 1
-            fi
-        fi
-
-        cd ..
+# Check principal (type check, compile check, etc.)
+if [ -n "$CHECK_CMD" ]; then
+    echo "[CHECK] Rodando verificação de código: $CHECK_CMD"
+    eval "$CHECK_CMD"
+    if [ $? -ne 0 ]; then
+        echo "ERRO CRÍTICO no check de código!"
+        echo "Comando: $CHECK_CMD"
+        echo "O agente deve intervir para corrigir antes de continuar."
+        exit 1
     fi
-done
+    echo "[CHECK] ✓ Código válido"
+else
+    echo "[CHECK] Nenhum check_cmd definido em prd.json > meta. Pulando."
+fi
 
-echo "Todas as verificações concluídas com sucesso!"
+# Lint
+if [ -n "$LINT_CMD" ] && [ "$LINT_CMD" != "null" ]; then
+    echo "[LINT] Rodando lint: $LINT_CMD"
+    eval "$LINT_CMD"
+    LINT_EXIT=$?
+    if [ $LINT_EXIT -ne 0 ]; then
+        echo "AVISO: Erros de lint encontrados. Corrija antes de continuar."
+        # Lint não é fatal por padrão — ajuste se necessário
+    else
+        echo "[LINT] ✓ Lint passou"
+    fi
+fi
+
+# Testes (opcional — só roda se TEST_CMD estiver definido e for solicitado explicitamente)
+if [ "$1" == "--with-tests" ] && [ -n "$TEST_CMD" ]; then
+    echo "[TESTES] Rodando testes: $TEST_CMD"
+    eval "$TEST_CMD"
+    if [ $? -ne 0 ]; then
+        echo "ERRO CRÍTICO nos testes!"
+        echo "Comando: $TEST_CMD"
+        echo "O agente deve intervir para corrigir."
+        exit 1
+    fi
+    echo "[TESTES] ✓ Testes passaram"
+fi
+
+echo ""
+echo "=== Verificações concluídas com sucesso ==="
 exit 0

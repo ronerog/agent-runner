@@ -52,7 +52,7 @@ Você também pode rodar o motor manualmente:
 ## 📁 Estrutura do Projeto
 
 ```text
-ralph-loop/
+agent-runner/
 ├── agent/                  # Core do Agente
 │   ├── roles/             # Definição dos papéis (Analista, Dev, QA, etc.)
 │   ├── prompts/           # Prompts base para Planejamento e Execução

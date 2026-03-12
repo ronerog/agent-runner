@@ -1,4 +1,4 @@
-# Script de Consolidação de Sessão - Ralph Loop
+# Script de Consolidação de Sessão - Agent Runner
 
 $SnapshotPath = "workspace/memory/snapshots/latest.md"
 $TemplatePath = "agent/prompts/snapshot_template.md"
@@ -17,4 +17,4 @@ $PRD = Get-Content "workspace/PRD.md" -Raw
 $Memory = Get-ChildItem "workspace/memory" -Filter "*.md"
 
 Write-Host "Snapshots preparados em $SnapshotPath" -ForegroundColor Green
-Write-Host "Ralph Loop: Por favor, preencha o arquivo latest.md agora." -ForegroundColor Yellow
+Write-Host "Agent Runner: Por favor, preencha o arquivo latest.md agora." -ForegroundColor Yellow

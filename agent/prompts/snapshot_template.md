@@ -1,4 +1,4 @@
-# Snapshot de Sessão - Ralph Loop
+# Snapshot de Sessão - Agent Runner
 
 ## 🕒 Timestamp: {{timestamp}}
 ## 🎯 Objetivo Atual: {{current_objective}}
@@ -24,4 +24,4 @@
 ---
 
 ## 🚀 Instrução para o Agente na Próxima Conversa
-Ralph Loop, ao iniciar, leia este arquivo em `workspace/memory/snapshots/latest.md` para recuperar o estado mental da sessão anterior. Não faça perguntas redundantes, apenas continue de onde paramos seguindo o log de "Próximos Passos".
+Agent Runner, ao iniciar, leia este arquivo em `workspace/memory/snapshots/latest.md` para recuperar o estado mental da sessão anterior. Não faça perguntas redundantes, apenas continue de onde paramos seguindo o log de "Próximos Passos".

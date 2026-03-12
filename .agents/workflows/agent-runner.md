@@ -1,5 +1,5 @@
 ---
-description: Inicia o motor de execução do Agente Autônomo (Ralph Loop) para um novo projeto.
+description: Inicia o motor de execução do Agente Autônomo (Agent Runner) para um novo projeto.
 ---
 # Workflow /agent-runner
 

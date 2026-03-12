@@ -1,4 +1,4 @@
-# Global Memory - Ralph Loop Agent
+# Global Memory - Agent Runner Agent
 
 Este é o arquivo raiz da "Memória Viva" do agente autônomo. 
 O principal objetivo desta pasta `/workspace/memory/` é garantir rastreabilidade nas decisões arquiteturais e técnicas que a IA tomou ao longo de diferentes execuções.

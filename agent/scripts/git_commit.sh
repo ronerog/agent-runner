@@ -16,7 +16,7 @@ fi
 
 echo "Adicionando arquivos..."
 git add .
-git commit -m "[RALPH-LOOP] $MSG"
+git commit -m "[AGENT-RUNNER] $MSG"
 
 if [ $? -eq 0 ]; then
     echo "Commit realizado com sucesso: $MSG"

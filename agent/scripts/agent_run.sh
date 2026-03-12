@@ -1,12 +1,12 @@
 #!/bin/bash
-# agent_run.sh - Motor de execução local (Ralph Loop)
+# agent_run.sh - Motor de execução local (Agent Runner)
 
 if [ ! -f "workspace/prd.json" ]; then
     echo "Erro: workspace/prd.json não encontrado. O agente parece não ter convertido o PRD."
     exit 1
 fi
 
-echo "Iniciando o motor de execução Ralph Loop..."
+echo "Iniciando o motor de execução Agent Runner..."
 echo "---"
 echo "[AGENT-INSTRUCTION] ATENÇÃO AGENTE IA:"
 echo "[AGENT-INSTRUCTION] Inicie o seguinte ciclo autônomo baseado no 'workspace/prd.json':"

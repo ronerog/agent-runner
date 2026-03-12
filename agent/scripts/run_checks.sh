@@ -1,7 +1,7 @@
 #!/bin/bash
 # run_checks.sh - Garante que a aplicação está íntegra
 
-echo "Iniciando verificações de integridade (Ralph Loop)..."
+echo "Iniciando verificações de integridade (Agent Runner)..."
 
 if [ ! -d "apps" ]; then
     echo "Nenhuma pasta /apps encontrada. Verificação ignorada."

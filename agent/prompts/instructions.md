@@ -1,6 +1,6 @@
-# Instruções Gerais do Agente (Ralph Loop)
+# Instruções Gerais do Agente (Agent Runner)
 
-Você é o "motor" do Ralph Loop. Quando for chamado pelo script `agent_run.sh` ou iniciar uma tarefa, siga rigidamente estas diretrizes:
+Você é o "motor" do Agent Runner. Quando for chamado pelo script `agent_run.sh` ou iniciar uma tarefa, siga rigidamente estas diretrizes:
 
 ## Papéis (Multi-Agent Team)
 O agente opera como um time completo de software. Os papéis estão definidos em `agent/roles/`:

@@ -1,95 +1,152 @@
-# Agent Runner — Agente de Desenvolvimento Autônomo 🚀
+# Agent Runner — Agente de Desenvolvimento Autônomo
 
-**Agent Runner** é um motor de execução agentivo projetado para transformar requisitos de software em aplicações completas e funcionais, simulando o fluxo de trabalho de uma equipe real de engenharia de software — e aprendendo empiricamente com cada projeto construído.
+**Agent Runner** é um motor de execução agentivo que transforma requisitos em software funcional, operando como um time completo de engenharia — e aprendendo empiricamente com cada projeto construído.
 
-## 🧠 O Conceito: RALPH LOOP
+Funciona em **qualquer IDE com IA** e **qualquer modelo de linguagem**.
 
-O Agent Runner opera sob o **RALPH LOOP** — um ciclo de aprendizado empírico inspirado na forma como desenvolvedores humanos crescem na carreira:
+---
+
+## Como Funciona — RALPH LOOP
 
 ```
-PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tarefas → LEARN GLOBAL → próximo projeto
+PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tarefas → LEARN GLOBAL
 ```
 
-Diferente de assistentes convencionais, o Agent Runner:
-- **Aprende** com cada erro e decisão técnica
-- **Persiste** esse conhecimento em uma memória acumulada (`workspace/memory/agent-brain.md`)
-- **Melhora** a cada projeto — automaticamente, sem intervenção humana
-- **Funciona** mesmo com modelos de IA com menor capacidade, graças a tarefas atômicas e auto-suficientes
+O agente planeja uma única vez, depois executa tarefa por tarefa em loop, aprendendo com cada ciclo. O conhecimento acumulado persiste em `workspace/memory/agent-brain.md` e melhora cada projeto subsequente.
 
-## 👥 O Time (Multi-Agent Roles)
+| Papel | Responsabilidade |
+|-------|-----------------|
+| Analista | Transforma ideias em PRDs, deduz features implícitas |
+| Arquiteto | Escolhe a stack certa, modela os dados, define estrutura |
+| Designer | Design System, paleta, layouts — adaptado ao nicho |
+| Desenvolvedor | Implementa com autonomia total, qualquer linguagem |
+| QA | Valida após cada tarefa, nunca avança com falhas |
+| Learner | Extrai padrões, atualiza a memória do agente |
+| Manager | Consolida contexto quando a sessão satura |
 
-| Papel | Arquivo | Responsabilidade |
-|-------|---------|-----------------|
-| 🤵 Analista | `analyst.md` | Transforma ideias em PRDs detalhados, deduz features implícitas |
-| 🏛️ Arquiteto | `architect.md` | Define stack, schema de dados, estrutura de pastas |
-| 🎨 Designer | `designer.md` | Cria Design System, paleta, tipografia, layouts |
-| 💻 Desenvolvedor | `dev.md` | Implementa features com autonomia extrema |
-| 🧪 QA | `qa.md` | Testa após cada feature, garante que nada quebra |
-| 📋 Manager | `manager.md` | Consolida contexto quando a janela de contexto satura |
-| 🧠 Learner | `learner.md` | Extrai padrões e atualiza a memória do agente |
+---
 
-## 🔄 Como Funciona
+## Compatibilidade
 
-### Fase 1: PLAN (única por projeto)
-O agente assume os papéis de Analista → Arquiteto → Designer e produz:
-- `workspace/PRD.md` — documento completo de requisitos
-- `workspace/requirements/[projeto].md` — lista detalhada de RFs/RNFs
-- `workspace/prd.json` — tarefas atômicas numeradas, cada uma com instructions auto-suficientes
+| IDE / Ferramenta | Arquivo de config | Comando |
+|-----------------|-------------------|---------|
+| **Windsurf** | `.windsurf/workflows/agent-runner.md` | `/agent-runner` |
+| **Cursor** | `.cursor/rules/agent-runner.mdc` | `/agent-runner` |
+| **Claude Code** | `CLAUDE.md` | `/agent-runner` |
+| **Gemini CLI** | `GEMINI.md` | `/agent-runner` |
+| **Cline / RooCode** | `.clinerules` | `/agent-runner` |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | `/agent-runner` |
+| **Qualquer IDE** | `agent/prompts/instructions.md` | cole o conteúdo no chat |
+| **Terminal** | `agent/scripts/start.sh` | veja abaixo |
 
-### Fase 2: EXECUTE → VERIFY → LEARN (loop por tarefa)
-Para cada tarefa do `prd.json`:
-1. **Dev implementa** seguindo as `instructions` da tarefa
-2. **QA verifica** compilação, lint e testes E2E
-3. **Learner registra** padrões aprendidos
-4. Commit automático e próxima tarefa
+---
 
-### Fase 3: LEARN GLOBAL (fim do projeto)
-O Learner faz uma análise completa do projeto e atualiza `workspace/memory/agent-brain.md` — a memória que persiste entre todos os projetos.
+## Como Usar
 
-## 🚀 Como Usar
+### Em IDEs (Windsurf, Cursor, Claude Code, etc.)
 
-### Via comando `/agent-runner`
-```text
-/agent-runner: Crie um [descreva seu projeto aqui]
+Abra o repositório na IDE e use o comando:
+
+```
+/agent-runner: Crie um [descreva seu projeto]
 ```
 
-### Via scripts
+Para retomar uma sessão anterior:
+```
+continuar
+```
+
+### No Terminal
+
+O `start.sh` gera o prompt de bootstrap e pode ser passado para qualquer AI CLI:
+
 ```bash
-./agent/scripts/agent_run.sh
+# Claude Code CLI
+claude "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+
+# Aider
+aider --message "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+
+# Gemini CLI
+gemini "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+
+# Retomar sessão anterior
+claude "$(./agent/scripts/start.sh)"
 ```
 
-## 📁 Estrutura
+Ou rode diretamente se o prd.json já existe:
+```bash
+bash agent/scripts/agent_run.sh
+```
 
-```text
+### Em qualquer IDE sem suporte a workflows
+
+Cole o conteúdo de `agent/prompts/instructions.md` no início da conversa, seguido de:
+```
+Projeto: [descreva o que quer construir]
+```
+
+---
+
+## Estrutura
+
+```
 agent-runner/
+├── CLAUDE.md                  # Bootstrap para Claude Code
+├── GEMINI.md                  # Bootstrap para Gemini CLI
+├── .clinerules                # Bootstrap para Cline/RooCode
+├── .cursor/rules/             # Bootstrap para Cursor
+├── .windsurf/workflows/       # Bootstrap para Windsurf
+├── .github/copilot-instructions.md  # Bootstrap para GitHub Copilot
+│
 ├── agent/
-│   ├── roles/              # Papéis do time (analyst, architect, dev, qa, designer, manager, learner)
-│   ├── prompts/            # Prompts do RALPH LOOP (instructions, plan, execute, learn, resume)
-│   └── scripts/            # Scripts de automação
-├── apps/                   # Projetos gerados (monorepo)
-├── workspace/
-│   ├── memory/
-│   │   ├── agent-brain.md  # ← MEMÓRIA DO AGENTE (cross-project, acumulativa)
-│   │   ├── global.md       # Regras globais do ambiente
-│   │   ├── [projeto].md    # Memória por projeto
-│   │   └── snapshots/      # Snapshots de sessão
-│   ├── requirements/       # Requisitos detalhados por projeto
-│   └── PRD.md              # PRD do projeto atual
+│   ├── roles/                 # Os 7 papéis do time
+│   ├── prompts/               # RALPH LOOP: instructions, plan, execute, learn, resume
+│   └── scripts/               # start.sh (terminal), agent_run.sh, git_commit.sh, run_checks.sh
+│
+├── apps/                      # Projetos gerados (monorepo)
+│
+└── workspace/
+    ├── memory/
+    │   ├── agent-brain.md     # Memória cross-project do agente (cresce com o uso)
+    │   ├── global.md          # Regras globais do ambiente
+    │   └── snapshots/         # Estado de sessões anteriores
+    ├── requirements/          # Requisitos detalhados por projeto
+    └── PRD.md                 # PRD do projeto atual
 ```
 
-## 🔋 Requisitos
+---
 
-- **IDE**: Windsurf, Cursor, ou qualquer IDE com suporte a agentes IA
-- **Runtime**: Node.js 18+ e Yarn
-- **IA**: Funciona com qualquer modelo — otimizado para modelos com menor capacidade
+## Stacks Suportadas
 
-## 🤝 Contribuição e Sabedoria Coletiva
+O Arquiteto escolhe a stack ideal para cada projeto. O agente domina qualquer linguagem:
 
-O Agent Runner é um **Organismo Coletivo**. Se o agente acumulou conhecimento valioso em `workspace/memory/agent-brain.md` durante o uso, encorajamos compartilhar essa sabedoria de volta.
+**JavaScript / TypeScript** — Next.js, React, Node.js, NestJS, Bun
+**Python** — Django, FastAPI, Flask
+**Go** — Chi, Gin, GORM
+**Rust** — Axum, Actix
+**Ruby** — Rails, Sinatra
+**Java / Kotlin** — Spring Boot
+**PHP** — Laravel
+**C#** — ASP.NET Core
+**Mobile** — React Native, Flutter
 
-Veja [CONTRIBUTING.md](./CONTRIBUTING.md) para saber como contribuir.
+---
 
-## 📝 Licença
+## Requisitos
+
+- **Node.js 18+** e **Yarn** (para projetos JS/TS)
+- **Runtime da stack escolhida** (Python, Go, Rust, etc. — conforme o projeto)
+- **jq** (opcional — usado pelo `run_checks.sh` para ler o `prd.json`)
+- **Git**
+
+---
+
+## Contribuindo
+
+Ao usar o Agent Runner, ele acumula sabedoria em `workspace/memory/agent-brain.md`. Compartilhe esse conhecimento de volta — veja [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+## Licença
 
 **GNU AGPLv3** — Melhorias ficam abertas. Evolução coletiva.
 

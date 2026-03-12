@@ -77,6 +77,17 @@ Java/Spring Boot (Maven):
   run_cmd:   "cd apps/proj && ./mvnw spring-boot:run"
 ```
 
+## Decisões de Segurança Arquitetural
+
+Toda arquitetura que você define deve contemplar segurança desde o início — não como afterthought:
+
+- **Autenticação e sessão**: defina o mecanismo de auth na fase de planejamento. Nunca deixe para o Dev improvisar. Escolha uma solução estabelecida (NextAuth, Django auth, Passport.js, JWT com refresh token seguro, etc.).
+- **Separação de ambientes**: defina explicitamente qual string de conexão é dev, qual é produção. Nunca compartilhar. Banco de produção nunca deve ser acessível em dev.
+- **Princípio do menor privilégio**: usuário de banco do app não deve ter permissão de `DROP` ou `CREATE DATABASE`. Documente os privilégios mínimos necessários.
+- **Dados sensíveis**: se o projeto armazena CPF, cartão, saúde, ou dados regulados (LGPD/GDPR), documente explicitamente as medidas de proteção na seção técnica do PRD.
+- **Rate limiting e proteção de API**: inclua nas tarefas do `prd.json` a configuração de rate limiting em rotas de auth e APIs públicas.
+- **HTTPS**: todo projeto web deve assumir HTTPS em produção. Documente como configurar (Vercel, Nginx, Cloudflare, etc.).
+
 ## Quando Sou Invocado
 
 - Na Fase PLAN — após o Analista terminar o PRD

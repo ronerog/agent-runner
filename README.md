@@ -151,3 +151,23 @@ Ao usar o Agent Runner, ele acumula sabedoria em `workspace/memory/agent-brain.m
 **GNU AGPLv3** — Melhorias ficam abertas. Evolução coletiva.
 
 Copyright (c) 2026 ronerog
+
+---
+
+## Aviso Importante — Leia Antes de Usar
+
+O Agent Runner é uma **ferramenta de estudo e experimentação**. Ele foi criado para ajudar pessoas a aprender e construir projetos com o apoio de IA, mas opera com autonomia — o que significa que você, o usuário, é responsável por supervisionar tudo o que ele faz.
+
+**Você é o engenheiro.** A IA é seu assistente, não o contrário.
+
+Algumas coisas que você deve sempre fazer:
+
+- **Revise o código gerado** antes de subir para produção. O agente pode cometer erros, usar abordagens desatualizadas ou interpretar requisitos de forma inesperada.
+- **Nunca rode em produção sem revisão.** Especialmente operações de banco de dados — migrações, deleções e resets podem ser irreversíveis.
+- **Verifique as dependências instaladas.** O agente tenta usar pacotes conhecidos e seguros, mas a responsabilidade final de auditar o que entra no seu projeto é sua.
+- **Guarde backups dos seus dados.** Antes de qualquer projeto que interaja com dados reais, faça backup.
+- **Não use em sistemas críticos sem supervisão técnica** (saúde, jurídico, financeiro, infraestrutura).
+
+O Agent Runner tem boas práticas de segurança embutidas (sem hardcode de secrets, hashing de senhas, validação de inputs, etc.), mas nenhuma ferramenta automatizada substitui a revisão humana. Use com curiosidade, aprenda com o processo, e sempre questione o que foi gerado.
+
+**Divirta-se construindo — só não esqueça de olhar o que está sendo construído.** 🙂

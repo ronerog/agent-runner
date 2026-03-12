@@ -74,6 +74,44 @@ Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 
 ---
 
+## Regras de Segurança (Absolutas — nunca viole)
+
+Estas regras protegem o usuário, seus dados e os dados de terceiros. São invioláveis independente da tarefa.
+
+### Banco de Dados — Risco Crítico
+- **NUNCA execute** `DROP DATABASE`, `DROP TABLE`, `DELETE FROM [tabela]` sem cláusula `WHERE`, `TRUNCATE`, ou `prisma migrate reset` **fora de ambiente de desenvolvimento explicitamente confirmado**.
+- Antes de qualquer operação destrutiva em banco: pare, documente a ação e exiba ao usuário para confirmação manual. **Dados apagados não voltam.**
+- Em migrações: prefira `ALTER TABLE` e migrações reversíveis. Nunca force migração em banco com dados reais sem backup explícito.
+- Nunca conecte ao banco de produção durante desenvolvimento. Use sempre `.env.local` com banco de dev/test.
+
+### Dependências — Risco de Comprometimento
+- **Só instale pacotes conhecidos e amplamente utilizados** (npm, PyPI, crates.io, etc.). Verifique: nome exato do pacote, número de downloads, data da última atualização, repositório oficial.
+- **Nunca instale pacotes** com nomes suspeitos, typosquatting (ex: `expres` em vez de `express`), zero downloads, ou sem repositório público.
+- Prefira dependências com menos de 5 dependências transitivas para funcionalidades simples.
+- Após instalar qualquer pacote novo: documente em `workspace/memory/[projeto].md` o nome, versão e motivo.
+
+### Segurança Mínima Obrigatória em Toda Aplicação
+Todo projeto gerado DEVE incluir, conforme a stack:
+
+| Proteção | O que fazer |
+|----------|------------|
+| **Secrets** | Nunca hardcode. Sempre variáveis de ambiente (`.env`). Sempre no `.gitignore`. |
+| **Autenticação** | Implementar auth em toda rota que acessa dados do usuário. Nunca expor rota sem proteção. |
+| **Senhas** | Sempre hashear com bcrypt, argon2 ou equivalente. Nunca armazenar em texto puro. |
+| **SQL Injection** | Sempre usar ORM ou queries parametrizadas. Nunca concatenar input do usuário em SQL. |
+| **XSS** | Nunca renderizar HTML diretamente de input do usuário sem sanitização. |
+| **CSRF** | Usar tokens CSRF em formulários ou Same-Site cookies. |
+| **Dados sensíveis** | Nunca logar senhas, tokens, CPF, cartão de crédito ou dados pessoais. |
+| **Uploads** | Validar tipo MIME e tamanho. Nunca executar arquivo enviado pelo usuário. |
+| **Rate limiting** | Implementar em rotas de login e APIs públicas. |
+
+### Arquivos do Sistema — Risco ao PC do Usuário
+- **NUNCA** acesse, leia, modifique ou delete arquivos fora do diretório do projeto (`apps/[projeto]/` e `workspace/`).
+- **NUNCA** rode comandos que afetam o sistema operacional do usuário: `rm -rf /`, modificações em `/etc/`, alterações em variáveis de ambiente globais, instalações globais sem aviso.
+- Se uma tarefa exigir instalação global (ex: `npm install -g`), documente e avise o usuário antes.
+
+---
+
 ## Gestão de Contexto (Manager)
 
 Se a qualidade das respostas degradar (repetições, esquecimentos, erros crescentes):

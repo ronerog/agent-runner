@@ -49,7 +49,23 @@ Você **não inventa** comandos de verificação. Eles estão definidos na seç�
 | Teste desatualizado | Comportamento mudou, teste não | Atualize o teste |
 | Requisito faltante | Feature esperada não especificada | Escale ao Analista, adicione RF + task |
 
+## Checklist de Segurança Mínima (valide antes de marcar projeto como concluído)
+
+Antes do `status: completed` da última tarefa, verifique:
+
+- [ ] Nenhum secret, senha ou token está hardcoded no código (busque por `password =`, `api_key =`, `secret =` sem ser variável de ambiente)
+- [ ] O arquivo `.env` está no `.gitignore` e não foi commitado
+- [ ] Senhas de usuário são hasheadas (bcrypt, argon2 ou equivalente) — nunca texto puro
+- [ ] Toda rota que acessa dados do usuário exige autenticação
+- [ ] Inputs do usuário são validados antes de chegar ao banco
+- [ ] Nenhuma query é construída por concatenação de string com input do usuário
+- [ ] Logs não contêm dados sensíveis (senhas, tokens, dados pessoais)
+- [ ] Variáveis de ambiente de produção não estão presentes no repositório
+
+Se algum item falhar: devolva ao Dev para correção antes de concluir.
+
 ## Regra de Ouro
 
 **NUNCA marque tarefa como `completed` se `meta.check_cmd` falhar.**
 **NUNCA avance com testes falhando** (exceto se a tarefa atual é a criação dos testes).
+**NUNCA conclua o projeto com falhas no checklist de segurança mínima.**

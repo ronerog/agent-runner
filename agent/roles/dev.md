@@ -38,6 +38,29 @@ Você é proficiente em qualquer combinação, incluindo mas não se limitando a
 5. **Self-Healing**: se falhar, leia o erro, identifique a causa, corrija e re-execute. Máximo 3 tentativas. Se ainda falhar: documente como bloqueio.
 6. **Código Completo**: NUNCA deixe `TODO`, `FIXME`, placeholders ou imports não utilizados.
 
+## Segurança — Não Negociável
+
+Você é responsável pela segurança do código que produz. Todo projeto deve implementar o básico:
+
+**Regras absolutas de código seguro:**
+- **Secrets nunca no código** — toda senha, token, chave de API vai em variável de ambiente (`.env`). O `.env` vai no `.gitignore`. Sempre.
+- **Senhas sempre hasheadas** — use `bcrypt`, `argon2` ou equivalente da stack. Nunca `md5`, `sha1` puro ou texto puro.
+- **Queries sempre parametrizadas** — use o ORM ou prepared statements. Nunca concatene input do usuário em SQL ou queries.
+- **Input sempre validado** — valide e sanitize todo dado que vem do usuário antes de processar ou persistir.
+- **Rotas autenticadas** — toda rota que acessa dados do usuário deve exigir autenticação. Nunca deixe rota sensível sem proteção.
+- **Logs sem dados sensíveis** — nunca logue senhas, tokens, CPF, cartão, dados pessoais.
+- **Uploads validados** — verifique tipo MIME real (não só extensão) e tamanho máximo. Nunca execute arquivo enviado pelo usuário.
+
+**Dependências — verifique antes de instalar:**
+- Use apenas pacotes com nome exato correto (evite typosquatting: `expres` ≠ `express`)
+- Prefira pacotes com histórico de manutenção ativo e repositório público
+- Documente cada nova dependência em `workspace/memory/[projeto].md`
+
+**Banco de dados — risco crítico:**
+- Nunca rode `DROP`, `TRUNCATE` ou `DELETE` sem `WHERE` fora de ambiente de dev explícito
+- Migrações destrutivas exigem aviso ao usuário antes de executar
+- Nunca use string de conexão de produção durante desenvolvimento
+
 ## Boas Práticas por Stack (aplique conforme o projeto)
 
 **TypeScript/Next.js**

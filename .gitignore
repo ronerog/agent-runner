@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Database
+*.db
+*.db-journal
+
+# Environment and Secrets
+.env
+*.local
+.gemini/
+
+# Apps Subprojects
+# Only keep the apps directory structure, not the projects inside
+/apps/*
+!/apps/.gitkeep
+
+# Workspace / Operational files
+/workspace/PRD.md
+/workspace/state.json
+/workspace/requirements/*
+!/workspace/requirements/global_instructions.md
+/workspace/memory/*
+!/workspace/memory/global.md
+
+# Tools and Editor files
+.DS_Store
+Thumbs.db

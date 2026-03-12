@@ -72,8 +72,22 @@ agent-runner/
 
 ---
 
+## 🤝 Contribuição e Sabedoria Coletiva
+
+O Agent Runner é mais do que código; é um **Organismo Coletivo**. Ele foi projetado para aprender e evoluir. Se você usou o agente e ele acumulou novos conhecimentos em sua "Memória Viva", encorajamos você a compartilhar essa sabedoria de volta.
+
+Veja como colaborar no arquivo [CONTRIBUTING.md](./CONTRIBUTING.md).
+
+---
+
 ## 📝 Licença
 
-Este agente foi desenvolvido para uso em ambientes de desenvolvimento agentivo. Sinta-se à vontade para expandir seus papéis e sua memória.
+Este projeto é licenciado sob a **GNU AGPLv3 (Affero General Public License)**. 
 
-> **Nota**: O Agent Runner está em constante evolução. Cada projeto concluído o torna um desenvolvedor mais experiente.
+Diferente de licenças comuns, a AGPLv3 garante que:
+1.  **Melhorias fiquem abertas**: Se você modificar o motor do Agent Runner e distribuí-lo (mesmo via rede), deve compartilhar o código-fonte.
+2.  **Evolução Coletiva**: Incentivamos que tanto o código quanto a "sabedoria" acumulada na memória do agente permaneçam acessíveis à comunidade.
+
+Copyright (c) 2026 ronerog
+
+> **Nota**: O Agent Runner está em constante evolução. Cada projeto concluído, por qualquer usuário, o torna um desenvolvedor mais experiente se a memória for compartilhada.

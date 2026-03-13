@@ -21,41 +21,54 @@ Só depois de ler o contexto acima, você pode agir. Não pule esta etapa, mesmo
 ## O RALPH LOOP — O Ciclo de Vida do Agente
 
 ```
-PLAN (1x) → [EXECUTE → VERIFY (técnico + visual) → LEARN] × N tarefas → VALIDAÇÃO FINAL → LEARN GLOBAL → FIM
+PLAN (1x) → [EXECUTE(task.type-routing) → VERIFY → LEARN] × N → VALIDAÇÃO FINAL → LEARN GLOBAL → FIM
 ```
 
-| Fase | Papéis | Arquivo de Referência | Frequência |
-|------|--------|----------------------|------------|
-| PLAN | Analista → Arquiteto → Designer | `agent/prompts/plan.md` | Uma vez por projeto |
-| EXECUTE | Desenvolvedor | `agent/prompts/execute.md` | Uma vez por tarefa |
-| VERIFY técnico | QA | (dentro do execute.md) | Uma vez por tarefa |
-| VERIFY visual | QA + Visual Validator | (dentro do execute.md) | Uma vez por tarefa de UI + checkpoint a cada 3 |
-| LEARN | Learner | `agent/prompts/learn.md` | Uma vez por tarefa + fim do projeto |
-| VALIDAÇÃO FINAL | QA + Visual Validator | (dentro do execute.md) | Uma vez ao final do projeto |
+**Orquestração central**: `agent/prompts/orchestrator.md` — leia quando precisar de: roteamento por tipo de tarefa, escalation matrix, role invocation protocol, ou state machine completa.
+
+| Fase | Papéis | Arquivo | Frequência |
+|------|--------|---------|------------|
+| PLAN | Analista → Arquiteto → Designer | `plan.md` | Uma vez por projeto |
+| EXECUTE | Dev → QA → (VisualValidator) | `execute.md` | Por tarefa, roteado por `task.type` |
+| LEARN rápido | Learner | `learn.md` | Por tarefa (silêncio se nada novo) |
+| VALIDAÇÃO FINAL | QA + Visual Validator | `execute.md` | Uma vez ao final |
+| LEARN GLOBAL | Learner | `learn.md` | Uma vez ao final |
 
 ### Fase PLAN (Única)
-Execute `agent/prompts/plan.md`. Produza: `workspace/PRD.md`, `workspace/requirements/[projeto].md`, `workspace/prd.json`, e — se `has_ui: true` — `workspace/design-system.md`.
-**NUNCA replaneie durante a execução. O plano é a lei. O prd.json é imutável (só adicione, nunca delete).**
+Execute `agent/prompts/plan.md`.
+Produz: `workspace/PRD.md` + `workspace/requirements/[projeto].md` + `workspace/prd.json` (com `type` em cada task) + `workspace/design-system.md` (se `has_ui: true`).
+**NUNCA replaneie. O `prd.json` é imutável — só adicione, nunca delete ou altere tarefas.**
 
-### Fase EXECUTE + VERIFY (Loop por Tarefa)
-Execute `agent/prompts/execute.md` para cada tarefa pendente do `prd.json`, uma por vez, em ordem.
+### Fase EXECUTE + VERIFY (Loop por Tarefa com Roteamento)
+Execute `agent/prompts/execute.md`. Cada tarefa é roteada pelo campo `task.type` para o pipeline correto de roles.
+Roles produzem sinais explícitos: `IMPL_READY`, `QA_PASS`, `QA_FAIL`, `VV_PASS`, `VV_FAIL`.
 
-### Fase LEARN (Após Cada Tarefa e Ao Final do Projeto)
-Execute `agent/prompts/learn.md`. Registre aprendizados em `workspace/memory/agent-brain.md`.
-Este é o mecanismo que faz você melhorar a cada projeto.
+### Fase LEARN
+Execute `agent/prompts/learn.md`. Silêncio quando nada novo — não gere output desnecessário.
 
 ---
 
-## Papéis do Time
+## Modos de Operação
+
+| Modo | Comando | Quando Usar |
+|------|---------|-------------|
+| **RALPH LOOP** | `/agent-runner <descrição>` | Construir projeto do zero (PLAN → EXECUTE → LEARN) |
+| **INJECT** | `/inject <caminho> — <tasks>` | Projeto existente: AUDIT → tasks específicas → EXECUTE |
+| **RESUME** | `continuar` | Retomar sessão anterior via snapshot |
+
+Para o modo INJECT: leia `agent/prompts/inject.md`.
+
+## Papéis do Time (9 Roles)
 
 Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 
 | Papel | Arquivo | Quando Usar |
 |-------|---------|-------------|
 | Analista | `analyst.md` | Fase PLAN — criação do PRD |
-| Arquiteto | `architect.md` | Fase PLAN — estrutura técnica |
+| Arquiteto | `architect.md` | Fase PLAN — estrutura técnica e stack |
+| Data Scientist | `data-scientist.md` | Fase PLAN (dados/stats/ML) + VERIFY de análises |
 | Designer | `designer.md` | Fase PLAN — Design System + `workspace/design-system.md` |
-| Desenvolvedor | `dev.md` | Fase EXECUTE |
+| Desenvolvedor | `dev.md` | Fase EXECUTE — implementação |
 | QA | `qa.md` | Fase VERIFY técnico |
 | Visual Validator | `visual-validator.md` | Fase VERIFY visual (tarefas de UI) + Validação Final |
 | Manager | `manager.md` | Contexto saturando — gerar snapshot |

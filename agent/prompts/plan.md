@@ -24,6 +24,22 @@ Leia o pedido do usuário. Pense como Product Owner sênior que conhece o mercad
 
 ---
 
+## Etapa 1b: Data Scientist (`agent/roles/data-scientist.md`) — apenas se projeto de dados
+
+**Invoque após o Analista** quando o projeto envolver análise de dados, estatística, ML, biostatística ou visualização analítica.
+
+O Data Scientist define:
+- Metodologia estatística adequada (quais testes, modelos, validações)
+- Estratégia de dados (EDA, tratamento de missing, normalização)
+- Requisitos de reprodutibilidade (seeds, versioning, relatório)
+- Task types de dados no prd.json: `notebook`, `pipeline`, `viz`, `model`, `report`, `r-script`, `r-shiny`
+
+Adicione no PRD.md (seção técnica): "Metodologia Estatística" com os métodos escolhidos e justificativas.
+
+> Se o projeto é puramente de dados (sem web app), o Designer pode ser dispensado (`has_ui: false`).
+
+---
+
 ## Etapa 2: Arquiteto (`agent/roles/architect.md`)
 
 Com base no PRD, defina a stack mais adequada para o projeto. **Não existe stack padrão obrigatória** — escolha a melhor ferramenta para o problema. Justifique cada escolha.
@@ -120,6 +136,7 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 {
   "id": 1,
   "role": "dev",
+  "type": "backend",
   "task": "Descrição concisa (verbo + objeto)",
   "file": "apps/[projeto]/caminho/exato/do/arquivo.ext",
   "instructions": "Instrução completa e auto-suficiente: o que criar, qual lógica, quais imports, qual comando. Escreva como se a IA não tivesse lido nada antes.",
@@ -128,6 +145,28 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
   "status": "pending"
 }
 ```
+
+**Campo `type` — valores válidos e seus pipelines:**
+
+| `type` | Quando usar | Pipeline |
+|--------|------------|---------|
+| `setup` | Scaffold, package.json, virtualenv, renv::init(), estrutura de pastas | Dev → commit |
+| `config` | .env.example, settings, tsconfig, docker-compose | Dev → QA(check) → commit |
+| `schema` | Models, migrations, Prisma schema, entidades | Dev → QA(check) → commit |
+| `backend` | Services, controllers, API routes, lógica de negócio | Dev → QA(check+lint) → commit |
+| `ui-setup` | globals.css com variáveis CSS do Design System | Dev → QA(check) → VV → commit |
+| `ui-component` | Componentes em `components/ui/` | Dev → QA(check+lint) → VV → commit |
+| `ui-screen` | Páginas e telas da aplicação | Dev → QA(check+lint) → VV → commit |
+| `integration` | Email, pagamento, storage, APIs externas | Dev → QA(check+test) → commit |
+| `test` | Testes E2E, unitários, de integração | QA → Dev(se falhar) → commit |
+| `docs` | README, documentação | Dev(light) → commit |
+| `notebook` | Jupyter notebook ou Quarto/R Markdown | Dev+DS → QA(check) → commit |
+| `pipeline` | ETL, transformação de dados, ingestão | Dev → QA(check+test) → commit |
+| `viz` | Visualização de dados (matplotlib, ggplot2, plotly) | Dev+DS → QA(check) → commit |
+| `model` | Modelo estatístico ou ML (treino, avaliação, salvamento) | Dev+DS → QA(check+test) → commit |
+| `report` | Relatório final (quarto render, PDF, HTML exportado) | Dev+DS → QA(check) → commit |
+| `r-script` | Script R standalone ou função em pacote R | Dev → QA(check+lint) → commit |
+| `r-shiny` | Aplicativo Shiny interativo | Dev → QA(check+lint) → VV → commit |
 
 ### Ordem das Tarefas (Sequência Obrigatória)
 

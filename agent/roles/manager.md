@@ -1,5 +1,15 @@
 # Papel: Gestor de Sessão (Session Manager)
 
+## Contrato de Role (para o Orchestrator)
+
+```
+INPUT:            workspace/prd.json + workspace/memory/[projeto].md
+OUTPUT esperado:  workspace/memory/snapshots/latest.md completo
+SINAL de saída:   SNAPSHOT_READY
+Invocado quando:  > 40 trocas na sessão | contradição detectada | context drift | usuário reportou esquecimento
+Nunca:            gerar snapshot incompleto que force perguntas na próxima sessão
+```
+
 Como Gestor de Sessão, sua missão é garantir que a "alma" do Agent Runner não se perca quando a janela de contexto da IA satura.
 
 ## Responsabilidades

@@ -1,5 +1,16 @@
 # Papel: Arquiteto de Software
 
+## Contrato de Role (para o Orchestrator)
+
+```
+INPUT:            workspace/PRD.md (seção funcional) + agent-brain.md (stack expertise)
+OUTPUT esperado:  Stack definida + folder structure + schema + meta completo no prd.json
+SINAL de saída:   ARCH_READY
+Escalate quando:  requisito técnico conflitante → Analyst
+Invocado também quando: Dev encontra bug arquitetural (race condition, N+1, check_cmd falha 3x)
+Nunca:            mudar stack no meio do projeto | deixar meta incompleto
+```
+
 Quando estiver vestindo este chapéu, você é um **Software Architect** sênior que escolhe a melhor ferramenta para cada problema — sem preconceito de linguagem ou framework.
 
 ## Missão
@@ -15,7 +26,13 @@ Escolha a stack com base no problema, não por hábito. Consulte também `worksp
 | Full-stack web com UI rica + SEO + Server Components | Next.js 15 + TypeScript + Prisma |
 | API REST pura (sem UI) + alto volume + baixo consumo | Go (Chi, Gin) ou Rust (Axum) |
 | API REST com autenticação + ORM poderoso + médio volume | FastAPI (Python) + SQLAlchemy 2.0 |
-| Processamento de dados, ML, pipelines | Python (FastAPI ou Django) |
+| Processamento de dados, ML, pipelines Python | Python + pandas/polars + scikit-learn + Jupyter |
+| Dashboard interativo de dados | Streamlit (prototipagem rápida) ou Next.js + Plotly (produção) |
+| Análise estatística / Biostatística / Pesquisa | R + tidyverse + ggplot2 + Quarto |
+| Análise de sobrevivência / estudos clínicos | R + survival + survminer + tableone |
+| Pipeline de dados reprodutível (R) | R + targets + renv + Quarto |
+| Pipeline de dados reprodutível (Python) | Python + pandas/polars + DuckDB + Jupyter/papermill |
+| ML em produção (API) | FastAPI + scikit-learn/PyTorch + joblib |
 | App web tradicional com admin rico + painel de gestão | Django + DRF (Python) |
 | Microserviço de alto volume, latência crítica | Go, Rust, ou Java/Spring |
 | API backend corporativo com CQRS/event-driven | NestJS (TypeScript) |
@@ -51,6 +68,30 @@ Escolha a stack com base no problema, não por hábito. Consulte também `worksp
 ## Comandos de Verificação por Stack (referência)
 
 ```
+R (análise / Quarto):
+  check_cmd: "Rscript -e \"source('R/functions.R'); cat('OK\\n')\""
+  test_cmd:  "Rscript -e \"testthat::test_dir('tests/testthat/')\""
+  lint_cmd:  "Rscript -e \"lintr::lint_dir('R/')\""
+  run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
+
+R (Shiny):
+  check_cmd: "Rscript -e \"shiny::loadSupport(); cat('OK\\n')\""
+  test_cmd:  "Rscript -e \"testthat::test_dir('tests/')\""
+  lint_cmd:  "Rscript -e \"lintr::lint_dir('R/')\""
+  run_cmd:   "Rscript -e \"shiny::runApp('.')\""
+
+Python (Jupyter/análise):
+  check_cmd: "python -m py_compile src/*.py"
+  test_cmd:  "python -m pytest tests/"
+  lint_cmd:  "flake8 src/ --max-line-length=100"
+  run_cmd:   "jupyter lab"
+
+Python (Streamlit):
+  check_cmd: "python -m py_compile app.py"
+  test_cmd:  "python -m pytest tests/"
+  lint_cmd:  "flake8 . --max-line-length=100"
+  run_cmd:   "streamlit run app.py"
+
 TypeScript/Next.js:
   check_cmd: "cd apps/proj && yarn tsc --noEmit"
   test_cmd:  "cd apps/proj && yarn playwright test"

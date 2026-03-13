@@ -28,24 +28,28 @@ Produza obrigatoriamente:
 - `workspace/prd.json` — tarefas atômicas com `instructions` auto-suficientes
 - `workspace/design-system.md` — se `has_ui: true`: contrato visual completo (CSS vars, paleta, fontes, componentes)
 
-O `prd.json` tem seção `meta` com os comandos da stack:
+O `prd.json` tem seção `meta` com os comandos da stack e cada tarefa tem campo `type`:
 ```json
 {
   "meta": {
     "project": "...", "stack": "...", "app_dir": "apps/...",
-    "check_cmd": "...",
-    "test_cmd": "...",
-    "lint_cmd": "...",
-    "run_cmd": "...",
+    "check_cmd": "...", "test_cmd": "...", "lint_cmd": "...", "run_cmd": "...",
     "has_ui": true,
     "visual_check_cmd": "grep -c 'var(--color-primary)' apps/.../app/globals.css"
-  }
+  },
+  "tasks": [
+    { "id": 1, "type": "backend", "task": "...", "file": "...", "instructions": "...", "done_when": "...", "rf": ["RF01"], "status": "pending" }
+  ]
 }
 ```
 
+**Tipos válidos de tarefa** (`type`): `setup` | `config` | `schema` | `backend` | `ui-setup` | `ui-component` | `ui-screen` | `integration` | `test` | `docs`
+O `type` determina qual pipeline de roles é executado. Detalhes: `agent/prompts/orchestrator.md`.
+
 **Regras do PLAN:**
 - Nunca replaneie depois. O `prd.json` é lei (só adicione tarefas, nunca delete)
-- Se `has_ui: true`: tarefas de `globals.css` e `components/ui/` ANTES de qualquer tela
+- Toda tarefa deve ter campo `type` definido
+- Se `has_ui: true`: tarefas `ui-setup` e `ui-component` ANTES de qualquer `ui-screen`
 - Ao concluir: informe stack + nº de tarefas e inicie EXECUTE imediatamente
 
 ---
@@ -57,32 +61,31 @@ Leia `agent/prompts/execute.md` e execute para cada tarefa pendente:
 ```
 Para cada tarefa pendente no prd.json (em ordem):
   1.  Selecionar tarefa → status: "in_progress"
-  2.  Carregar contexto mínimo: agent-brain.md + instructions da tarefa
-      + design-system.md (se tarefa de UI)
-  3.  Implementar como Dev — sem TODOs, sem placeholders
-  4.  Verificar: executar meta.check_cmd
-      → falha: corrigir e repetir (máx 3x) → ainda falha: marcar "blocked", continuar
-  5.  [SE tarefa de UI e has_ui: true]
-      → executar meta.visual_check_cmd
-      → invocar agent/roles/visual-validator.md — checar conformidade com design-system.md
-      → falha: Dev reimplementa com variáveis CSS corretas
-  6.  Verificar task.done_when objetivamente
-  7.  Executar meta.lint_cmd (se não for null)
-  8.  Executar meta.test_cmd (se tarefa de teste ou lógica crítica modificada)
-  9.  [A cada 3 tarefas de UI concluídas]
-      → Checkpoint PRD: cores, fontes, componentes base — tudo conforme o PRD?
+      → Ler task.type → selecionar pipeline (orchestrator.md)
+  2.  Carregar contexto mínimo por tipo:
+      → sempre: agent-brain.md + task.instructions
+      → ui-*: + design-system.md | schema: + modelos existentes
+  3.  [Dev] Implementar — sem TODOs, sem placeholders → SINAL: IMPL_READY
+  4.  [QA] Gate técnico: meta.check_cmd
+      → PASS: continue | FAIL ×3: ESCALADA Dev→Architect → marcar "blocked"
+  5.  [QA+VV] Gate visual (apenas task.type = ui-* e has_ui: true)
+      → visual_check_cmd + Checklist Visual Validator → SINAL: VV_PASS | VV_FAIL
+  6.  [QA] Verificar done_when objetivamente
+  7.  [QA] Lint (pula: setup, config, schema, ui-setup, test, docs)
+  8.  [QA] Testes (apenas: backend crítico, integration, test)
+  9.  [A cada 3 ui-* concluídas] Checkpoint PRD conformidade
  10.  Commit: bash agent/scripts/git_commit.sh "Task [id]: [nome]"
- 11.  Marcar status: "completed" no prd.json
- 12.  LEARN rápido: erro novo → agent-brain.md | padrão novo → agent-brain.md | nada → silêncio
-      → Informar: ✓ Task [id]/[total]: [nome] — [N] restantes
-      → Próxima tarefa
+ 11.  Marcar status: "completed" → SINAL: TASK_DONE
+ 12.  [Learner] LEARN rápido → silêncio se nada novo
+      → Informar: ✓ Task [id]/[total]: [nome] (type:[type]) — [N] restantes
 ```
 
 **Regras de ferro:**
 - Uma tarefa por vez — nunca implemente duas simultaneamente
 - `completed` é permanente — nunca altere
-- Nova tarefa necessária? → adicione ao final do `prd.json` com ID maior
-- Contexto saturando? → acione Manager (`agent/roles/manager.md`) antes de degradar
+- Nova tarefa necessária? → ID maior + `rf` vinculado + `type` definido
+- Escalação após 3 falhas → Escalation Matrix (orchestrator.md), nunca improvise
+- Contexto saturando (> 40 trocas)? → Manager proativamente antes de degradar
 
 ---
 

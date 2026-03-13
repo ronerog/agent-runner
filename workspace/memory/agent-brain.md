@@ -348,6 +348,112 @@ func NewServer(opts ...Option) *Server { s := &Server{port: 8080, timeout: 30*ti
 
 ---
 
+### Python — Data Science / Análise de Dados
+
+**Manipulação de Dados (pandas):**
+- Especifique `dtype` no `read_csv` upfront — mais rápido e menos memória.
+- `df['col'].astype('category')` para colunas de baixa cardinalidade (string) — reduz memória 10x.
+- Nunca itere linha a linha (`iterrows`) — use operações vetorizadas, `apply` com axis, ou `np.where`.
+- `df.pipe(func)` para encadeamento limpo de transformações.
+- `groupby().agg({'col': ['mean', 'std', 'count']})` para agregações complexas em um passo.
+- `pd.merge` vs `pd.concat`: merge para JOIN por coluna, concat para empilhar DataFrames.
+- `df.memory_usage(deep=True).sum()` para checar memória antes de operações grandes.
+- **Polars** para datasets grandes (>1M linhas): lazy evaluation, Rust backend, 10x mais rápido.
+- **DuckDB** para SQL em DataFrames: `duckdb.query("SELECT * FROM df WHERE...").df()` — mais rápido que pandas filter para queries complexas.
+
+**Estrutura de Projeto de Dados:**
+```
+apps/projeto-dados/
+  data/raw/          # NUNCA modificar — dados originais imutáveis
+  data/processed/    # transformações intermediárias
+  notebooks/         # exploração (não produção)
+  src/               # código modular e testável
+    ingestion.py, transform.py, model.py, viz.py
+  tests/
+  reports/           # outputs finais (PDF, HTML)
+  requirements.txt + pyproject.toml
+```
+
+**scikit-learn — ML:**
+- `Pipeline([('scaler', StandardScaler()), ('model', LogisticRegression())])` — preprocessing + model juntos, evita data leakage.
+- `StratifiedKFold` para classificação desbalanceada. `TimeSeriesSplit` para dados temporais.
+- `cross_val_score` com `scoring='roc_auc'` para avaliação robusta.
+- Sempre `random_state=42` em modelos e splits.
+- `joblib.dump(pipeline, 'model.pkl')` para salvar; `joblib.load()` para carregar.
+
+**Reprodutibilidade obrigatória:**
+- `np.random.seed(42)` no topo de todo script.
+- `nbstripout` no git pre-commit hook para não commitar outputs de notebooks.
+- `papermill` para executar notebooks parametrizados em produção.
+- `pip freeze > requirements.txt` ou `conda env export > environment.yml` antes de commitar.
+
+**Visualização:**
+- `matplotlib.rcParams['figure.dpi'] = 150` e `figsize=(8, 5)` como padrão.
+- `sns.set_palette("colorblind")` para acessibilidade.
+- Plotly para interatividade. Matplotlib/Seaborn para publicação estática.
+- Streamlit para dashboards rápidos (`st.dataframe`, `st.plotly_chart`, `st.slider`).
+
+---
+
+### R — Data Science / Biostatística
+
+**Tidyverse — O Padrão Moderno:**
+- Use `|>` (pipe nativo R 4.1+) em vez de `%>%`. Em R < 4.1: `%>%` do magrittr.
+- `dplyr::across(where(is.numeric), mean)` para aplicar função em múltiplas colunas.
+- `tidyr::pivot_longer` / `pivot_wider` — não `melt`/`cast` (deprecated).
+- `forcats::fct_reorder(col, outro_col)` para ordenar fatores por valor numérico em ggplot.
+- `lubridate::ymd()`, `mdy()`, `dmy()` para parsear datas automaticamente.
+- `stringr::str_detect`, `str_extract`, `str_replace_all` para strings.
+
+**ggplot2 — Gramática Correta:**
+- `aes()` dentro de `ggplot()` para estética global; dentro de `geom_*()` para estética local.
+- `theme_minimal()` ou `theme_classic()` para publicações científicas.
+- `scale_color_viridis_d()` / `scale_fill_viridis_c()` para acessibilidade daltonismo.
+- `patchwork::wrap_plots()` para compor múltiplos gráficos.
+- `ggsave('fig.pdf', width=6, height=4, dpi=300)` para exportação.
+
+**Gerenciamento de Ambiente:**
+- `renv::init()` ao criar projeto — isola dependências.
+- `renv::install('pacote')` e `renv::snapshot()` após instalar.
+- `renv::restore()` para reproduzir em outra máquina. `renv.lock` deve ser commitado.
+
+**Quarto (Relatórios Reprodutíveis):**
+- `.qmd` substitui `.Rmd` — suporte a R, Python, Julia no mesmo documento.
+- `#| echo: false` para ocultar código; `#| warning: false` para suprimir warnings.
+- `quarto::quarto_render('analysis.qmd')` para renderizar programaticamente.
+- `params:` no YAML header para parametrizar relatórios.
+
+**targets (Pipeline de Dados):**
+```r
+# _targets.R
+tar_plan(
+  tar_target(raw_data, read_csv("data/raw/data.csv")),
+  tar_target(clean_data, clean(raw_data)),
+  tar_target(model, fit_model(clean_data)),
+  tar_target(report, render_report(model))
+)
+# tar_make() executa só o que mudou (como Make)
+```
+
+**Biostatística — Padrões:**
+- Sempre reportar: estatística do teste + p-valor EXATO + effect size + IC 95% + n por grupo.
+- `shapiro.test(x)` para normalidade (n<50). Q-Q plot para diagnóstico visual.
+- `leveneTest(y ~ group, data)` do `car` package para homocedasticidade.
+- Sobrevivência: `survival::survfit` + `survminer::ggsurvplot` com `pval=TRUE, conf.int=TRUE, risk.table=TRUE`.
+- Dados longitudinais/agrupados: `lme4::lmer` (contínuo) ou `lme4::glmer` (binário).
+- Múltiplas comparações: `p.adjust(p_values, method='BH')` para Benjamini-Hochberg.
+- Tabela 1 clínica: `tableone::CreateTableOne(vars, strata='group', data=df)`.
+
+**Comandos check/test para prd.json (R):**
+```
+check_cmd: "Rscript -e \"source('R/functions.R'); cat('syntax OK\\n')\""
+test_cmd:  "Rscript -e \"testthat::test_dir('tests/testthat/')\""
+lint_cmd:  "Rscript -e \"lintr::lint_dir('R/')\""
+run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
+```
+
+---
+
 ## Arquitetura — Padrões e Decisões
 
 ### Monolito vs Microsserviços

@@ -4,25 +4,39 @@
 - **Data/Hora**: {{timestamp}}
 - **Projeto**: {{project_name}}
 - **Sessão**: {{session_number}}
+- **Stack**: {{stack}}
+
+---
+
+## Estado Orquestrador
+
+- **Fase atual**: {{fase_atual}}  ← PLAN | EXECUTE_LOOP | VALIDATE | LEARN_GLOBAL
+- **Último sinal recebido**: {{ultimo_sinal}}  ← IMPL_READY | QA_PASS | QA_FAIL | VV_PASS | TASK_DONE
+- **Escalação pendente**: {{escalacao_pendente}}  ← null ou "Dev→Architect: [motivo]"
 
 ---
 
 ## Estado das Tarefas
+
 - **Total**: {{total_tasks}}
 - **Concluídas**: {{completed_tasks}}
+- **Em progresso**: {{in_progress_tasks}}
 - **Bloqueadas**: {{blocked_tasks}}
 - **Pendentes**: {{pending_tasks}}
 
 ---
 
 ## Última Ação Realizada
-Task {{last_task_id}}: {{last_task_name}} — `{{last_task_status}}`
+
+Task {{last_task_id}} (type: {{last_task_type}}): {{last_task_name}} — `{{last_task_status}}`
+
+Pipeline executado: {{pipeline_executado}}  ← ex: "Dev → QA_PASS → VV_PASS → committed"
 
 ---
 
 ## Próximos Passos (Para a Nova Sessão)
 
-1. **Imediato**: {{next_step_1}}
+1. **Imediato**: Task {{next_task_id}} (type: {{next_task_type}}): {{next_task_name}}
 2. **Em seguida**: {{next_step_2}}
 3. **Depois**: {{next_step_3}}
 
@@ -31,8 +45,8 @@ Task {{last_task_id}}: {{last_task_name}} — `{{last_task_status}}`
 ## Bloqueios Ativos
 
 {{#if blocked_items}}
-| Task ID | Descrição | Erro | Próxima Ação |
-|---------|-----------|------|--------------|
+| Task ID | Type | Descrição | Erro Exato | Tentativas | Escalada Para | Próxima Ação |
+|---------|------|-----------|------------|-----------|--------------|--------------|
 {{blocked_items}}
 {{else}}
 Nenhum bloqueio ativo.
@@ -58,4 +72,9 @@ Nenhum novo padrão identificado nesta sessão.
 
 ## Instrução de Retomada
 
-Agent Runner: ao iniciar nova conversa, leia este arquivo (`workspace/memory/snapshots/latest.md`) antes de qualquer ação. Identifique a próxima tarefa pendente no `prd.json` e execute sem fazer perguntas. O contexto está completo acima.
+Agent Runner: ao iniciar nova conversa, leia este arquivo antes de qualquer ação.
+1. Leia `workspace/prd.json` — identifique primeira task com status `pending` ou `in_progress`
+2. Leia `task.type` → selecione o pipeline correto (orchestrator.md)
+3. Execute **sem fazer perguntas**. O contexto acima é completo.
+
+Se `escalacao_pendente` não for null: resolva a escalação antes de retomar o loop normal.

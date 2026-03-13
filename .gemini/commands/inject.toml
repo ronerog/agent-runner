@@ -1,0 +1,47 @@
+[inject]
+description = "Modo INJECT — adiciona features a um projeto existente sem replanejar. Use: /inject <caminho-ou-nome> — <descrição das tasks>"
+prompt = """
+Ao receber o caminho/nome do projeto e a descrição das tasks, execute o modo INJECT com autonomia total. Não peça confirmação em nenhuma etapa.
+
+FASE 0 — CARREGAR CONTEXTO
+
+Leia nesta ordem:
+1. workspace/memory/agent-brain.md — anti-padrões e aprendizados globais
+2. workspace/memory/snapshots/latest.md — estado da sessão anterior (se existir)
+3. workspace/memory/global.md — regras globais do ambiente
+
+FASE 1 — AUDIT (entender o projeto existente)
+
+Leia agent/prompts/inject.md e execute a Fase AUDIT completa:
+- Leia README do projeto, estrutura de pastas, package.json/requirements.txt/go.mod
+- Identifique: stack, padrões de código, naming conventions, estrutura de arquivos
+- Mapeie arquivos relevantes para as tasks solicitadas
+- Produza workspace/memory/[projeto]-audit.md com o mapeamento completo
+
+FASE 2 — TASK SYNTHESIS
+
+Crie workspace/prd.json com mode: "inject" contendo APENAS as tasks solicitadas.
+Cada task deve ter type definido (setup|config|schema|backend|ui-setup|ui-component|ui-screen|integration|test|docs|notebook|pipeline|viz|model|report|r-script|r-shiny).
+As instructions devem respeitar os padrões do projeto existente identificados no AUDIT.
+
+FASE 3 — EXECUTE
+
+Execute o loop normal de execute.md para cada task pendente:
+1. Selecionar task → status: "in_progress" → rotear por task.type
+2. Implementar preservando padrões do projeto existente
+3. Gate técnico: meta.check_cmd
+4. Gate visual (apenas ui-*): visual_check_cmd + Visual Validator
+5. Lint + testes conforme o tipo
+6. Commit: bash agent/scripts/git_commit.sh "Task [id]: [nome]"
+7. status: "completed"
+
+REGRAS DO INJECT:
+- NÃO execute a Fase PLAN — o projeto já existe
+- Preserve padrões do projeto existente (naming, estrutura, estilo)
+- Minimize blast radius — altere apenas arquivos necessários
+- Não instale novas dependências sem necessidade clara
+- Testes existentes devem continuar passando
+- Se descobrir requisito implícito → adicione task ao final do prd.json
+
+Ver agent/prompts/inject.md para protocolo completo.
+"""

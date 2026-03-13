@@ -24,27 +24,32 @@ Produza obrigatoriamente:
 - workspace/prd.json — tarefas atômicas com instructions auto-suficientes
 - workspace/design-system.md — se has_ui: true: contrato visual completo
 
-O prd.json tem seção meta com os comandos da stack (check_cmd, test_cmd, lint_cmd, run_cmd, has_ui, visual_check_cmd).
+O prd.json tem seção meta com os comandos da stack (check_cmd, test_cmd, lint_cmd, run_cmd, has_ui, visual_check_cmd). Cada tarefa tem campo 'type' que determina o pipeline (ver agent/prompts/orchestrator.md):
+- Web: setup|config|schema|backend|ui-setup|ui-component|ui-screen|integration|test|docs
+- Dados/R: notebook|pipeline|viz|model|report|r-script|r-shiny
+Para projetos de dados/stats/ML: invocar agent/roles/data-scientist.md durante o PLAN (Analista → Arquiteto → Data Scientist → Designer → Task Breakdown).
 
 Regras do PLAN:
 - Nunca replaneie depois. O prd.json é lei (só adicione tarefas, nunca delete)
+- Toda tarefa deve ter type definido.
 - Se has_ui: true: tarefas de globals.css e components/ui/ ANTES de qualquer tela
 - Ao concluir: informe stack + nº de tarefas e inicie EXECUTE imediatamente
 
 PASSO 2 — FASE EXECUTE + VERIFY (loop por tarefa)
 
 Leia agent/prompts/execute.md e execute para cada tarefa pendente:
-1. Selecionar tarefa → status: "in_progress"
-2. Carregar contexto mínimo: agent-brain.md + instructions da tarefa + design-system.md (se UI)
-3. Implementar como Dev — sem TODOs, sem placeholders
-4. Verificar: executar meta.check_cmd → falha: corrigir (máx 3x) → blocked se falhar
-5. [SE tarefa de UI] executar visual_check_cmd + invocar visual-validator.md
-6. Verificar task.done_when objetivamente
-7. Executar lint_cmd e test_cmd se aplicável
-8. [A cada 3 tarefas de UI] Checkpoint PRD de conformidade visual
-9. Commit: bash agent/scripts/git_commit.sh "Task [id]: [nome]"
-10. Marcar status: "completed" no prd.json
-11. LEARN rápido: erro/padrão novo → agent-brain.md | nada → silêncio
+1. Selecionar tarefa → status: "in_progress" → Ler task.type → pipeline correto (orchestrator.md)
+2. Carregar contexto mínimo: agent-brain.md + instructions da tarefa + design-system.md (se ui-*)
+3. [Dev] Implementar — sem TODOs, sem placeholders → SINAL: IMPL_READY
+4. [QA] Gate técnico: meta.check_cmd → PASS: continue | FAIL ×3: ESCALADA Dev→Architect → marcar "blocked"
+5. [QA+VV] Gate visual (apenas task.type = ui-* e has_ui: true) → visual_check_cmd + Checklist Visual Validator
+6. [QA] Verificar task.done_when objetivamente
+7. [QA] Lint (pula: setup, config, schema, ui-setup, test, docs)
+8. [QA] Testes (apenas: backend crítico, integration, test)
+9. [A cada 3 ui-* concluídas] Checkpoint PRD conformidade
+10. Commit: bash agent/scripts/git_commit.sh "Task [id]: [nome]"
+11. Marcar status: "completed" → SINAL: TASK_DONE
+12. [Learner] LEARN rápido → silêncio se nada novo
 
 PASSO 3 — VALIDAÇÃO FINAL INTEGRADA
 
@@ -56,4 +61,9 @@ PASSO 4 — LEARN GLOBAL
 Leia agent/prompts/learn.md e atualize workspace/memory/agent-brain.md com padrões e aprendizados.
 
 Para retomar sessão anterior: leia agent/prompts/resume.md + workspace/memory/snapshots/latest.md
+
+MODOS DE OPERAÇÃO:
+- RALPH LOOP (/agent-runner <descrição>): construir projeto do zero
+- INJECT (/inject <caminho> — <tasks>): adicionar features a projeto existente — leia agent/prompts/inject.md
+- RESUME (continuar): retomar sessão anterior via snapshot
 """

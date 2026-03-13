@@ -2,11 +2,13 @@
 
 Execute este loop para **cada tarefa** do `workspace/prd.json`, uma de cada vez, em ordem crescente de ID.
 
+> Referência de roteamento e escalação: `agent/prompts/orchestrator.md`
+
 ---
 
-## Antes de Começar: Ler os Metadados da Stack
+## Antes de Começar: Ler Metadados
 
-Leia a seção `meta` do `workspace/prd.json`. Ela define os comandos de verificação e flags do projeto:
+Leia a seção `meta` do `workspace/prd.json`:
 
 ```json
 "meta": {
@@ -14,157 +16,255 @@ Leia a seção `meta` do `workspace/prd.json`. Ela define os comandos de verific
   "stack": "Python/Django",
   "app_dir": "apps/nome",
   "check_cmd": "cd apps/nome && python manage.py check",
-  "test_cmd": "cd apps/nome && python -m pytest",
-  "lint_cmd": "cd apps/nome && flake8 .",
-  "run_cmd": "cd apps/nome && python manage.py runserver",
+  "test_cmd":  "cd apps/nome && python -m pytest",
+  "lint_cmd":  "cd apps/nome && flake8 .",
+  "run_cmd":   "cd apps/nome && python manage.py runserver",
   "has_ui": true,
   "visual_check_cmd": "grep -c 'var(--color-primary)' apps/nome/app/globals.css"
 }
 ```
 
-- `has_ui`: se `true`, ativa verificações visuais nas tarefas de UI
-- `visual_check_cmd`: comando para confirmar se as variáveis CSS do Design System estão aplicadas
-
-Estes são os únicos comandos de verificação que você vai usar nesta sessão. Não invente comandos.
+Estes são os únicos comandos de verificação desta sessão. Não invente comandos.
 
 ---
 
-## Protocolo por Tarefa (11 Passos)
+## Roteamento por Tipo de Tarefa
 
-### Passo 1 — Selecionar Tarefa
-- Leia `workspace/prd.json`.
-- Pegue a **primeira tarefa** com `status: "pending"`.
-- Se não houver tarefas pendentes: **projeto concluído** → vá para a **Fase de Validação Final** (abaixo) antes da Fase LEARN GLOBAL.
-- Atualize a tarefa selecionada para `status: "in_progress"` no `prd.json` imediatamente.
+Antes de executar cada tarefa, leia `task.type` e selecione o pipeline:
 
-### Passo 2 — Carregar Contexto Mínimo (Economia de Tokens)
-Leia **apenas**:
-1. `workspace/memory/agent-brain.md` — anti-padrões globais a evitar
-2. `workspace/memory/[projeto].md` — contexto e decisões do projeto (se existir)
-3. O campo `instructions` da tarefa atual — é auto-suficiente
+| `type` | Pipeline Obrigatório | Passos que PULA |
+|--------|---------------------|-----------------|
+| `setup` | Dev → commit | lint, visual, test |
+| `config` | Dev → QA(check) → commit | lint, visual, test |
+| `schema` | Dev → QA(check) → commit | lint, visual, test |
+| `backend` | Dev → QA(check + lint) → test(se crítico) → commit | visual |
+| `ui-setup` | Dev → QA(check) → VisualValidator → commit | lint, test |
+| `ui-component` | Dev → QA(check + lint) → VisualValidator → commit | test |
+| `ui-screen` | Dev → QA(check + lint) → VisualValidator → commit | test |
+| `integration` | Dev → QA(check + test) → commit | visual |
+| `test` | QA → Dev(fix se necessário) → commit | visual, lint |
+| `docs` | Dev(light) → commit | check, lint, visual, test |
+| `notebook` | Dev + DataScientist → QA(check) → commit | lint, visual, test |
+| `pipeline` | Dev → QA(check + test) → commit | visual |
+| `viz` | Dev + DataScientist → QA(check) → commit | test |
+| `model` | Dev + DataScientist → QA(check + test) → commit | visual |
+| `report` | Dev + DataScientist → QA(check) → commit | lint, test |
+| `r-script` | Dev → QA(check + lint) → commit | visual |
+| `r-shiny` | Dev → QA(check + lint) → VisualValidator → commit | test |
 
-**Exceção para tarefas de UI** (quando `meta.has_ui: true` e a tarefa cria/modifica telas ou componentes):
-- Leia também `workspace/design-system.md` — variáveis CSS e componentes definidos pelo Designer
-- Se `workspace/design-system.md` não existir: **bloqueie** a tarefa, escale ao Designer para criá-lo e crie uma tarefa de prioridade máxima no prd.json para produzir esse arquivo.
+> **Se `task.type` estiver ausente**: trate como `backend` (pipeline completo menos visual).
 
-### Passo 3 — Implementar (Papel: Desenvolvedor)
+> **Para tipos `notebook`, `viz`, `model`, `report`, `r-script`**: Após `IMPL_READY`, execute o **Gate Estatístico** antes do Gate Técnico do QA:
+> 1. Data Scientist executa Protocolo de Validação Estatística (`agent/roles/data-scientist.md` seção "Fase VERIFY")
+> 2. Sinal `DS_PASS` → QA executa `check_cmd` normalmente
+> 3. Sinal `DS_FAIL:[motivo]` → Dev + DS corrigem → repete validação (máx 2x) → ainda falha: `ESCALADA DS → Architect`
+
+---
+
+## Protocolo por Tarefa
+
+### Passo 1 — Selecionar + Rotear
+
+```
+SINAL DE ENTRADA → ORCHESTRATOR
+```
+
+- Leia `workspace/prd.json`. Pegue a **primeira tarefa** com `status: "pending"`.
+- Se **não houver tarefas pendentes** → vá para a **Fase de Validação Final**.
+- Leia `task.type` → selecione o pipeline da tabela acima.
+- Atualize para `status: "in_progress"` imediatamente.
+- Informe: `⚙ Iniciando Task [id]/[total]: [nome] (type: [type])`
+
+### Passo 2 — Carregar Contexto Mínimo (por tipo)
+
+**Sempre carregue:**
+1. `workspace/memory/agent-brain.md` — anti-padrões globais
+2. Campo `instructions` da tarefa atual — auto-suficiente
+
+**Adicione se o tipo exigir:**
+- Tarefa de `ui-*`: + `workspace/design-system.md`
+- Tarefa de `schema`: + modelos existentes (verificar conflitos)
+- Tarefa de `backend`: + `workspace/memory/[projeto].md` (decisões técnicas)
+
+**Nunca carregue para economizar tokens:**
+- PRD completo a cada tarefa
+- Todas as tasks anteriores
+- Arquivos que não são `task.file`
+
+### Passo 3 — Implementar
+
+```
+ROLE: Desenvolvedor | INPUT: task.instructions + contexto mínimo
+```
+
 - Crie ou modifique o arquivo exato em `task.file`.
 - Siga `task.instructions` à risca.
-- Para tarefas de UI: implemente usando exclusivamente as variáveis CSS e componentes de `workspace/design-system.md`. Nunca use valores hardcoded de cor, fonte ou espaçamento.
-- Instale dependências conforme a stack:
+- Para tarefas `ui-*`: use **exclusivamente** variáveis CSS de `workspace/design-system.md`. Nunca valores hardcoded de cor, fonte ou espaçamento.
+- Instale dependências:
   - Node.js: `yarn add [pacote]`
-  - Python: `pip install [pacote]` e atualize `requirements.txt`
+  - Python: `pip install [pacote]` + `requirements.txt`
   - Go: `go get [módulo]`
   - Rust: `cargo add [crate]`
   - Ruby: `bundle add [gem]`
-- **NUNCA deixe TODOs, placeholders ou código comentado inacabado.**
-- **NUNCA peça permissão ao usuário.** Tome a decisão e implemente.
+- **NUNCA** deixe TODOs, placeholders ou imports não utilizados.
+- **NUNCA** peça permissão. Decida e implemente.
 
-### Passo 4 — Verificar Código (Papel: QA)
-Execute o `meta.check_cmd` definido na seção `meta` do `prd.json`.
+```
+SINAL DE SAÍDA (Dev) → IMPL_READY | arquivo task.file criado/modificado
+```
 
-Exemplos do que pode ser:
-- `cd apps/proj && yarn tsc --noEmit` (TypeScript)
-- `cd apps/proj && python manage.py check` (Django)
-- `cd apps/proj && go build ./...` (Go)
-- `cd apps/proj && cargo check` (Rust)
+### Passo 4 — Gate Técnico
 
-**Se passar**: continue para o Passo 4.5 (se UI) ou Passo 5.
-**Se falhar**: leia o erro, corrija, repita. Máximo **3 tentativas**.
-**Se após 3 tentativas ainda falhar**: marque como `status: "blocked"`, documente o erro exato em `workspace/memory/[projeto].md`, e continue para a próxima tarefa.
+```
+ROLE: QA | INPUT: task.done_when + meta.check_cmd
+```
 
-### Passo 4.5 — Verificar Design System (Papel: QA + Visual Validator) — apenas se `meta.has_ui: true` e tarefa é de UI
+Execute `meta.check_cmd`.
 
-Execute `meta.visual_check_cmd`. Se retornar 0 ou falhar:
-- A tarefa não aplicou o Design System corretamente
-- Volte ao Dev (Passo 3): reimplemente usando `var(--nome-da-variavel)` em vez de valores hardcoded
-- Máximo 2 tentativas de correção
+| Resultado | Ação |
+|-----------|------|
+| ✓ PASS | Continue → Passo 4.5 (se `ui-*`) ou Passo 5 |
+| ✗ FAIL (tentativa 1 ou 2) | Leia o erro → Dev corrige → re-execute |
+| ✗ FAIL (tentativa 3) | `ESCALADA: Dev → Architect` com erro exato → marque `blocked` → próxima task |
 
-Se passou: invoque `agent/roles/visual-validator.md` — execute o **Checklist de Conformidade Visual** para esta tarefa.
+```
+SINAL DE SAÍDA (QA) → QA_PASS | QA_FAIL:[erro] | QA_BLOCKED
+```
 
-Se qualquer item do checklist falhar: volte ao Dev para correção antes de continuar.
+### Passo 4.5 — Gate Visual *(apenas tarefas `ui-*` com `meta.has_ui: true`)*
 
-### Passo 5 — Verificar Critério de Conclusão (Papel: QA)
-Verifique se `task.done_when` foi atendido objetivamente.
-- **Se sim**: continue para o Passo 6.
-- **Se não**: volte ao Passo 3.
+```
+ROLE: QA + Visual Validator | INPUT: design-system.md + arquivo implementado
+```
 
-### Passo 6 — Lint (Papel: QA) — se `meta.lint_cmd` não for null
-Execute `meta.lint_cmd`. Se houver erros (não apenas warnings): corrija antes de continuar.
+**4.5a — Check de variáveis CSS:**
+Execute `meta.visual_check_cmd`.
+- Retorna 0 → FAIL: Dev reimplementa com `var(--nome-da-variavel)` (máx 2 tentativas)
+- Se após 2 tentativas ainda 0 → `ESCALADA: Dev → Designer` com CSS atual
 
-### Passo 7 — Testes (Papel: QA) — se aplicável
-Execute `meta.test_cmd` apenas se:
-- A tarefa atual é uma tarefa de teste OU
-- A tarefa anterior modificou lógica de negócio crítica
+**4.5b — Checklist Visual Validator** (`agent/roles/visual-validator.md`):
+Execute o Checklist de Conformidade Visual completo.
+- Falhas → Dev corrige antes de avançar.
 
-Se falhar:
-- Bug de código → corrija como Dev, volte ao Passo 3
-- Teste desatualizado → atualize o teste para refletir o comportamento correto
-- Bug arquitetural → documente em `workspace/memory/[projeto].md`, escale na próxima sessão
+```
+SINAL DE SAÍDA → VV_PASS | VV_FAIL:[item específico]
+```
 
-**NUNCA avance com testes falhando** (exceto se a tarefa atual é a criação dos próprios testes).
+### Passo 5 — Verificar `done_when`
 
-### Passo 7.5 — Checkpoint de Conformidade PRD (a cada 3 tarefas de UI) — apenas se `meta.has_ui: true`
+```
+ROLE: QA | INPUT: task.done_when
+```
 
-Conte as tarefas de UI concluídas nesta sessão. Se for múltiplo de 3 (3, 6, 9...):
+Verifique objetivamente se o critério de conclusão foi atendido.
+- **Sim** → continue
+- **Não** → volte ao Passo 3
 
-Execute o **Checkpoint PRD** do `agent/roles/qa.md`:
-- [ ] Cores implementadas correspondem à paleta do PRD?
+### Passo 6 — Lint *(pula para `setup`, `config`, `schema`, `ui-setup`, `test`, `docs`)*
+
+Execute `meta.lint_cmd`. Erros bloqueiam. Warnings não.
+
+### Passo 7 — Testes *(apenas `backend` com lógica crítica, `integration`, `test`)*
+
+Execute `meta.test_cmd`.
+
+| Resultado | Ação |
+|-----------|------|
+| ✓ PASS | Continue |
+| ✗ Bug de código | Dev corrige → volta Passo 3 |
+| ✗ Teste desatualizado | QA atualiza o teste (comportamento mudou legitimamente) |
+| ✗ Bug arquitetural | `ESCALADA: QA → Architect` com descrição técnica |
+
+**NUNCA avance com testes falhando** (exceto se a task atual É a criação dos testes).
+
+### Passo 7.5 — Checkpoint PRD *(a cada 3 tasks `ui-*` concluídas — `meta.has_ui: true`)*
+
+Conte tasks de UI concluídas. Se múltiplo de 3:
+
+```
+ROLE: QA | Checkpoint de Conformidade PRD
+```
+
+- [ ] Cores implementadas correspondem à paleta do Design System?
 - [ ] Fontes definidas pelo Designer estão sendo usadas?
-- [ ] Componentes base listados foram criados em `components/ui/`?
-- [ ] Nenhuma tela tem CSS genérico sem o Design System?
+- [ ] Componentes base existem em `components/ui/`?
+- [ ] Nenhuma tela tem CSS genérico sem Design System?
 
-Se houver falha: crie uma tarefa de correção no `prd.json` com ID maior e execute antes de prosseguir.
+Falha → crie task de correção com `type: "ui-screen"` e `status: "pending"` no final do `prd.json`.
 
 ### Passo 8 — Commit
+
 ```bash
 bash agent/scripts/git_commit.sh "Task [id]: [task resumida]"
 ```
 
 ### Passo 9 — Atualizar Estado
-- Marque a tarefa como `status: "completed"` no `prd.json`.
-- Se tomou decisão técnica relevante: adicione em `workspace/memory/[projeto].md`:
+
+```
+SINAL → prd.json: task.status = "completed"
+```
+
+- Marque `status: "completed"`.
+- Se tomou decisão técnica relevante → adicione em `workspace/memory/[projeto].md`:
   ```
-  - [DECISÃO] Task [id]: [o que foi decidido e por quê]
+  - [DECISÃO] Task [id]: [decisão] | [motivo]
   ```
 
-### Passo 10 — LEARN Rápido (Papel: Learner)
-Execute o **Ciclo Rápido** de `agent/prompts/learn.md`:
-- Erro inesperado? → documente em `workspace/memory/[projeto].md`
-- Padrão recorrente? → adicione em `workspace/memory/agent-brain.md`
-- Nada novo? → **não gere output**. Continue.
+### Passo 10 — LEARN Rápido
+
+```
+ROLE: Learner | INPUT: erros e decisões desta task (somente)
+```
+
+Execute Ciclo Rápido de `agent/prompts/learn.md`:
+- Erro inesperado → `workspace/memory/[projeto].md`
+- Padrão recorrente → `workspace/memory/agent-brain.md`
+- Nada novo → **silêncio** (não gere output — economize tokens)
 
 ### Passo 11 — Informar Progresso
-Informe ao usuário: `✓ Task [id]/[total]: [nome da tarefa] — [N] restantes`
 
-**Volte ao Passo 1.**
+```
+✓ Task [id]/[total]: [nome da tarefa] (type: [type]) — [N] restantes
+```
+
+**→ Volte ao Passo 1.**
 
 ---
 
-## Fase de Validação Final Integrada (antes da Fase LEARN GLOBAL)
+## Fase de Validação Final Integrada
 
-Quando todas as tarefas pendentes estiverem concluídas, **antes** de declarar o projeto finalizado:
+Quando **nenhuma tarefa pendente** existir, antes de declarar o projeto finalizado:
 
-### Validação Técnica Final
-1. Execute `meta.check_cmd` — deve passar sem erros
+### Gate Técnico Final
+
+```
+ROLE: QA
+```
+
+1. Execute `meta.check_cmd` — deve passar
 2. Execute `meta.test_cmd` — todos os testes devem passar
-3. Execute o **Checklist de Segurança Mínima** de `agent/roles/qa.md`
+3. Execute Checklist de Segurança Mínima (`agent/roles/qa.md`)
 
-### Validação Visual Final (apenas se `meta.has_ui: true`)
-Invoque `agent/roles/visual-validator.md` — execute a seção **"Validação Final Integrada"** completa:
-1. Leia `workspace/design-system.md` — extraia todas as variáveis CSS
-2. Confirme que cada variável está declarada em `globals.css`
-3. Liste todas as telas do PRD — confirme que cada uma tem arquivo de implementação
-4. Verifique se todas as telas passam no "teste do primeiro olhar"
-5. Confirme consistência visual entre todas as telas
+### Gate Visual Final *(apenas se `meta.has_ui: true`)*
 
-Se a Validação Visual Final encontrar falhas:
-- Crie tarefas de correção no `prd.json`
-- Execute essas tarefas antes de concluir
-- Repita a Validação Visual Final
+```
+ROLE: Visual Validator | INPUT: design-system.md + todas as telas implementadas
+```
+
+Execute seção "Validação Final Integrada" de `agent/roles/visual-validator.md`:
+1. Cada variável CSS de `design-system.md` está em `globals.css`?
+2. Cada tela do PRD tem arquivo de implementação?
+3. Todas as telas passam no "teste do primeiro olhar"?
+4. Consistência visual entre todas as telas?
+
+**Se qualquer gate falhar:**
+- Crie tasks de correção no `prd.json` com tipo correto
+- Execute essas tasks
+- Repita a Validação Final
 
 ### Declarar Projeto Concluído
-Só após aprovação em **ambas** as validações (técnica + visual), execute a Fase LEARN GLOBAL.
+
+Só após **ambos os gates passarem** → execute Fase LEARN GLOBAL (`agent/prompts/learn.md` Ciclo Profundo).
 
 ---
 
@@ -172,11 +272,13 @@ Só após aprovação em **ambas** as validações (técnica + visual), execute 
 
 | Regra | Detalhe |
 |-------|---------|
-| Leia `meta` primeiro | Os comandos de verificação vêm do `prd.json`, nunca hardcoded |
-| Uma tarefa por vez | Nunca implemente duas tarefas simultaneamente |
+| Leia `meta` primeiro | Comandos de verificação vêm do `prd.json`, nunca hardcoded |
+| Roteie por `task.type` | Nunca execute passos irrelevantes para o tipo da tarefa |
+| Uma tarefa por vez | Nunca implemente duas simultaneamente |
 | Não pule tarefas | Bloqueio → marque `blocked`, documente, continue |
-| Nunca altere `completed` | É permanente |
-| Nova tarefa necessária? | Adicione ao final do `prd.json` com ID maior, nunca altere tarefas existentes |
-| Contexto saturando | Acione Manager ANTES que a qualidade degrede |
-| Design System é gate | Para projetos com UI: sem `workspace/design-system.md`, nenhuma tela pode ser implementada |
-| Validação Final é obrigatória | Nunca declare projeto concluído sem a Validação Final Integrada |
+| `completed` é permanente | Nunca altere |
+| Nova tarefa? | Adicione ao final do `prd.json` com ID maior + `rf` vinculado |
+| Contexto saturando? | Acione Manager **ANTES** que a qualidade degrede (> 40 trocas) |
+| Design System é gate | Sem `design-system.md`: nenhuma task `ui-*` pode iniciar |
+| Validação Final é obrigatória | Nunca declare projeto concluído sem ela |
+| Escalation é do Orchestrator | Após 3 falhas, siga a Escalation Matrix — não improvise |

@@ -66,11 +66,51 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 - Axios response interceptor: catch 401, try refresh, retry request, redirect on failure
 - `AuthContext` with `useAuth()` hook; wrap only necessary subtrees (not global root) with `AuthProvider`
 
+### Django Models and Migrations
+- **Sempre verifique modelos existentes antes de criar novos** - evite conflitos de `related_name`
+- Conflito OneToOne: `Reverse accessor 'Guest.rsvp' clashes with reverse accessor for 'rsvp.RSVP.guest'`
+- **Configure settings development ativo em __init__.py**: `from .development import *`
+- Use `python manage.py showmigrations` para verificar status das migrations
+- SQLite em development é seguro; PostgreSQL em production via Docker
+
+### TypeScript Configuration
+- **baseUrl is deprecated in TypeScript 7.0** - remova em vez de usar `ignoreDeprecations`
+- Use apenas `paths` com "@/*": ["./src/*"] para aliases
+- `ignoreDeprecations: "6.0"` não é válido - causa build errors
+
+### Component Architecture (Next.js 15)
+- **class-variance-authority (cva)** é o padrão para variantes de componentes
+- **forwardRef** obrigatório para todos os componentes UI
+- **@radix-ui/react-slot** para composição de componentes (asChild pattern)
+- **Utils pattern**: `cn()` function com `clsx` + `tailwind-merge`
+- Estrutura: `components/ui/index.ts` para exports centralizados
+
+### Agent Behavior Patterns (Meta-Learning)
+- **Agentes de baixo custo pulam etapas críticas**: SWE e modelos similares tendem a pular Fase PLAN, ignorar PRD.json, e ir direto para implementação
+- **Resultado**: Entregam projetos incompletos, sem estrutura adequada, e sem seguir o fluxo proposto
+- **Padrão identificado**: Agentes sem memória acumulada repetem erros básicos em cada projeto
+- **Regra de ouro**: **Sempre execute o RALPH LOOP completo** - Planejamento é mais importante que implementação
+- **Verificação**: Se um agente entrega sem passar por PRD → requirements → prd.json, está quebrando o protocolo
+- **Custo vs Qualidade**: Agentes mais baratos economizam tokens no planejamento, mas gastam mais em debugging e refatoração
+
+### Project Documentation Patterns
+- **README.md é obrigatório**: Sempre crie documentação completa de como rodar o projeto
+- **Comando run_cmd do prd.json**: Use `docker-compose up --build` ou equivalente como método principal
+- **Estrutura fixa do README**: Pré-requisitos, Como rodar, Comandos úteis, Estrutura do projeto, Docker
+- **Sempre inclua**: URLs de acesso (frontend, backend, admin), ports, e comandos de verificação
+- **Documentação viva**: Atualize README quando mudar arquitetura ou comandos
+
 ---
 
 ## Anti-Padrões Conhecidos
 
-*(Erros que o agente já cometeu e não deve repetir. Populado automaticamente.)*
+- **Criar modelos sem verificar existentes**: Conflito de related_name causa SystemCheckError
+- **Usar ignoreDeprecations inválido**: `ignoreDeprecations: "6.0"` não funciona no tsconfig.json
+- **Deixar settings development desativado**: DATABASES improperly configured sem engine válido
+- **Hardcode paths em utils**: Use @/lib/utils pattern com cn() function
+- **Criar componentes sem forwardRef**: Quebra composição e ref forwarding
+- **Agente pular Fase PLAN**: Econimiza tokens no planejamento, mas causa refatoração excessiva
+- **Ignorar PRD.json e requirements**: Resulta em entregas incompletas e sem alinhamento com requisitos
 
 ---
 
@@ -79,6 +119,7 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 | Projeto | Stack | Data | Tarefas | Concluídas | Bloqueadas | Aprendizados |
 |---------|-------|------|---------|------------|------------|--------------|
 | wedding-platform | Next.js 15 + Django 5 + PostgreSQL + Redis + Docker | 2026-03-12 | 33 | 33 | 0 | Multi-tenant subdomain routing via Next.js middleware; Django custom User with email auth; UUID primary keys on all models; JWT in localStorage with axios interceptors |
+| wedding-saas | Next.js 15 + Django 4.2 + PostgreSQL + Redis + MinIO | 2026-03-12 | 33 | 11 | 0 | Django models conflict resolution; TypeScript baseUrl deprecation; Component architecture with cva; Multi-environment Django settings; Agent behavior patterns (low-cost shortcuts) |
 
 ---
 

@@ -9,7 +9,7 @@ Works with **any AI-powered IDE** and **any language model**.
 ## How It Works — RALPH LOOP
 
 ```
-PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tasks → LEARN GLOBAL
+PLAN (1x) → [EXECUTE → VERIFY (technical + visual) → LEARN] × N tasks → FINAL VALIDATION → LEARN GLOBAL
 ```
 
 The agent plans once, then executes task by task in a loop, learning with every cycle. Accumulated knowledge persists in `workspace/memory/agent-brain.md` and improves every subsequent project.
@@ -18,11 +18,21 @@ The agent plans once, then executes task by task in a loop, learning with every 
 |------|---------------|
 | Analyst | Transforms ideas into PRDs, deduces implicit features |
 | Architect | Chooses the right stack, models data, defines structure |
-| Designer | Design System, palette, layouts — adapted to the niche |
-| Developer | Implements with full autonomy, any language |
-| QA | Validates after each task, never advances with failures |
+| Designer | Design System, palette, layouts — produces `workspace/design-system.md` |
+| Developer | Implements with full autonomy; reads Design System before every UI task |
+| QA | Technical validation after each task — never advances with failures |
+| Visual Validator | Visual compliance check — ensures UI matches Design System and PRD |
 | Learner | Extracts patterns, updates the agent's memory |
 | Manager | Consolidates context when the session window saturates |
+
+### Quality Gates (for UI projects)
+
+The agent now enforces three quality layers for any project with a visual interface:
+
+1. **Per-task technical gate** — `check_cmd` must pass before any task is marked complete
+2. **Per-task visual gate** — `visual_check_cmd` verifies CSS variables are applied; Visual Validator checks Design System compliance
+3. **PRD Compliance checkpoint** — every 3 UI tasks, a cross-check against the full PRD
+4. **Final Integrated Validation** — before the project is declared complete, a full sweep of both technical and visual quality
 
 ---
 
@@ -100,7 +110,7 @@ agent-runner/
 ├── .github/copilot-instructions.md  # Bootstrap for GitHub Copilot
 │
 ├── agent/
-│   ├── roles/                 # The 7 team roles
+│   ├── roles/                 # The 8 team roles (incl. visual-validator)
 │   ├── prompts/               # RALPH LOOP: instructions, plan, execute, learn, resume
 │   └── scripts/               # start.sh (terminal), agent_run.sh, git_commit.sh, run_checks.sh
 │
@@ -112,6 +122,7 @@ agent-runner/
     │   ├── global.md          # Global environment rules
     │   └── snapshots/         # Previous session state
     ├── requirements/          # Detailed requirements per project
+    ├── design-system.md       # Visual contract: CSS vars, palette, components (UI projects)
     └── PRD.md                 # Current project PRD
 ```
 

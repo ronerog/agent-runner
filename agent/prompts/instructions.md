@@ -21,18 +21,20 @@ Só depois de ler o contexto acima, você pode agir. Não pule esta etapa, mesmo
 ## O RALPH LOOP — O Ciclo de Vida do Agente
 
 ```
-PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tarefas → LEARN GLOBAL → FIM
+PLAN (1x) → [EXECUTE → VERIFY (técnico + visual) → LEARN] × N tarefas → VALIDAÇÃO FINAL → LEARN GLOBAL → FIM
 ```
 
 | Fase | Papéis | Arquivo de Referência | Frequência |
 |------|--------|----------------------|------------|
 | PLAN | Analista → Arquiteto → Designer | `agent/prompts/plan.md` | Uma vez por projeto |
 | EXECUTE | Desenvolvedor | `agent/prompts/execute.md` | Uma vez por tarefa |
-| VERIFY | QA | (dentro do execute.md) | Uma vez por tarefa |
+| VERIFY técnico | QA | (dentro do execute.md) | Uma vez por tarefa |
+| VERIFY visual | QA + Visual Validator | (dentro do execute.md) | Uma vez por tarefa de UI + checkpoint a cada 3 |
 | LEARN | Learner | `agent/prompts/learn.md` | Uma vez por tarefa + fim do projeto |
+| VALIDAÇÃO FINAL | QA + Visual Validator | (dentro do execute.md) | Uma vez ao final do projeto |
 
 ### Fase PLAN (Única)
-Execute `agent/prompts/plan.md`. Produza: `workspace/PRD.md`, `workspace/requirements/[projeto].md`, `workspace/prd.json`.
+Execute `agent/prompts/plan.md`. Produza: `workspace/PRD.md`, `workspace/requirements/[projeto].md`, `workspace/prd.json`, e — se `has_ui: true` — `workspace/design-system.md`.
 **NUNCA replaneie durante a execução. O plano é a lei. O prd.json é imutável (só adicione, nunca delete).**
 
 ### Fase EXECUTE + VERIFY (Loop por Tarefa)
@@ -52,9 +54,10 @@ Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 |-------|---------|-------------|
 | Analista | `analyst.md` | Fase PLAN — criação do PRD |
 | Arquiteto | `architect.md` | Fase PLAN — estrutura técnica |
-| Designer | `designer.md` | Fase PLAN — Design System |
+| Designer | `designer.md` | Fase PLAN — Design System + `workspace/design-system.md` |
 | Desenvolvedor | `dev.md` | Fase EXECUTE |
-| QA | `qa.md` | Fase VERIFY |
+| QA | `qa.md` | Fase VERIFY técnico |
+| Visual Validator | `visual-validator.md` | Fase VERIFY visual (tarefas de UI) + Validação Final |
 | Manager | `manager.md` | Contexto saturando — gerar snapshot |
 | Learner | `learner.md` | Fase LEARN |
 
@@ -70,7 +73,9 @@ Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 6. **SEMPRE leia `agent-brain.md` primeiro** — evite repetir erros já aprendidos.
 7. **SEMPRE commite após cada tarefa concluída** — progresso incremental e reversível.
 8. **Se travar 3x no mesmo erro** — documente em `agent-brain.md` com causa e solução, e siga em frente.
-9. **Economia de tokens** — na Fase EXECUTE, leia apenas o campo `instructions` da tarefa + `agent-brain.md`. Não releia PRD inteiro a cada tarefa.
+9. **Economia de tokens** — na Fase EXECUTE, leia apenas o campo `instructions` da tarefa + `agent-brain.md`. Exceção: tarefas de UI leem também `workspace/design-system.md`. Não releia PRD inteiro a cada tarefa.
+10. **Design System é pré-requisito de UI** — `workspace/design-system.md` deve existir antes de qualquer tarefa de tela. Nunca implemente UI sem o Design System definido.
+11. **Validação Final é obrigatória** — antes de declarar projeto concluído, execute a Validação Final Integrada (técnica + visual).
 
 ---
 

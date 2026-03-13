@@ -104,13 +104,51 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 
 ## Anti-Padrões Conhecidos
 
-- **Criar modelos sem verificar existentes**: Conflito de related_name causa SystemCheckError
-- **Usar ignoreDeprecations inválido**: `ignoreDeprecations: "6.0"` não funciona no tsconfig.json
-- **Deixar settings development desativado**: DATABASES improperly configured sem engine válido
-- **Hardcode paths em utils**: Use @/lib/utils pattern com cn() function
-- **Criar componentes sem forwardRef**: Quebra composição e ref forwarding
-- **Agente pular Fase PLAN**: Econimiza tokens no planejamento, mas causa refatoração excessiva
-- **Ignorar PRD.json e requirements**: Resulta em entregas incompletas e sem alinhamento com requisitos
+### Código/Django: Criar modelos sem verificar existentes
+- **Problema**: Conflito de `related_name` causa `SystemCheckError` em runtime
+- **Regra**: "Sempre verifique modelos existentes antes de criar novos. Use `python manage.py check` antes de migrar."
+
+### Código/TypeScript: Usar ignoreDeprecations inválido
+- **Problema**: `ignoreDeprecations: "6.0"` não funciona no tsconfig.json; causa build errors
+- **Regra**: "Remova `baseUrl` em vez de tentar suprimir o warning. Use apenas `paths`."
+
+### Código/Django: Deixar settings development desativado
+- **Problema**: `DATABASES improperly configured` sem engine válido
+- **Regra**: "Configure `from .development import *` em `__init__.py` do settings."
+
+### Código/Next.js: Hardcode paths em utils
+- **Regra**: "Use o padrão `@/lib/utils` com `cn()` function (`clsx` + `tailwind-merge`)."
+
+### Código/React: Criar componentes sem forwardRef
+- **Regra**: "Todos os componentes UI devem usar `forwardRef` para preservar composição e ref forwarding."
+
+### Processo: Agente pular Fase PLAN
+- **Problema**: Agentes de baixo custo pulam planejamento para economizar tokens, mas causam refatoração excessiva
+- **Regra**: "Sempre execute o RALPH LOOP completo. Planejamento economiza mais tokens que debugging."
+
+### Processo: Ignorar prd.json e requirements
+- **Regra**: "Nunca implemente sem prd.json. Resultados sem estrutura não seguem o contrato com o usuário."
+
+### UI/Design: Dev implementando páginas sem ler o Design System
+- **Problema**: Dev implementa telas usando classes Tailwind genéricas (`bg-gray-800`, `text-white`) em vez das variáveis CSS do Design System. Resultado: interface parece "HTML puro" sem estilização do PRD.
+- **Causa-raiz**: Processo linear sem gate visual. Dev avançava para telas sem que `globals.css` com variáveis CSS fosse criado primeiro.
+- **Solução**: Ordem obrigatória: globals.css → componentes base → telas. Dev deve ler `workspace/design-system.md` antes de qualquer tarefa de UI. QA bloqueia se `visual_check_cmd` retornar 0.
+- **Regra**: "Nunca implemente uma tela antes de `workspace/design-system.md` existir e `globals.css` ter as variáveis CSS declaradas."
+- **Projeto**: wedding-platform | **Data**: 2026-03-13
+
+### QA: Verificação superficial de UI (apenas compilação, não aparência)
+- **Problema**: QA verificava apenas se o código compilava e se rotas retornavam HTTP 200. Bugs de UI/UX (ausência do Design System, layout incorreto, componentes genéricos) passavam como "aprovados".
+- **Causa-raiz**: O QA não tinha critério visual — apenas critério técnico.
+- **Solução**: Para projetos com `has_ui: true`, QA executa `visual_check_cmd` + invoca Visual Validator após cada tarefa de UI + Checkpoint de Conformidade a cada 3 tarefas de UI + Validação Final Integrada antes de concluir.
+- **Regra**: "Compilar sem erro e ter visual correto são dois gates separados. Ambos são obrigatórios."
+- **Projeto**: wedding-platform | **Data**: 2026-03-13
+
+### Processo: Falta de validação holística ao final do projeto
+- **Problema**: Projeto declarado "concluído" após a última tarefa, sem verificação integrada do produto final. Discrepâncias acumuladas entre PRD e implementação passavam despercebidas.
+- **Causa-raiz**: RALPH LOOP não tinha fase de Validação Final antes do LEARN GLOBAL.
+- **Solução**: Fase de Validação Final Integrada obrigatória antes de declarar projeto concluído: validação técnica (check_cmd + testes + segurança) + validação visual (Visual Validator completo).
+- **Regra**: "Nunca declare projeto concluído sem a Validação Final Integrada passar em ambas as dimensões: técnica e visual."
+- **Projeto**: wedding-platform | **Data**: 2026-03-13
 
 ---
 
@@ -125,7 +163,15 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 
 ## Notas de Auto-Melhoria
 
-*(O agente registra aqui quando atualiza seus próprios papéis ou fluxos.)*
+### 2026-03-13 — Round 3: Visual Validation System
+Diagnóstico pós-projeto wedding-platform revelou falhas sistêmicas na qualidade visual. Mudanças aplicadas:
+- **Novo papel**: `agent/roles/visual-validator.md` — inspetor de conformidade visual
+- **Designer**: agora produz `workspace/design-system.md` como artefato obrigatório (contrato visual)
+- **Dev**: obrigado a ler `workspace/design-system.md` antes de qualquer tarefa de UI
+- **QA**: adicionados gate visual (`visual_check_cmd`), Checkpoint de Conformidade a cada 3 UI tasks, e Checklist de Qualidade Visual na conclusão
+- **execute.md**: adicionados Passo 4.5 (visual check), Passo 7.5 (checkpoint PRD), e Fase de Validação Final Integrada
+- **plan.md**: `has_ui` e `visual_check_cmd` adicionados ao schema do `meta`; Designer obrigado a criar `design-system.md` antes do task breakdown; ordem das tarefas atualizada com globals.css e componentes base antes de telas
+- **instructions.md**: RALPH LOOP atualizado; Visual Validator adicionado ao time; Regras de Ouro 10 e 11 adicionadas
 
 ---
 

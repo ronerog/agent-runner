@@ -57,15 +57,22 @@ Documente no `workspace/PRD.md` (seção técnica):
 
 ## Etapa 3: Designer (`agent/roles/designer.md`)
 
-Com base no PRD e stack, defina e documente em seção de design do `workspace/PRD.md`:
-- Referências visuais do nicho (sites reais similares)
-- Paleta de cores completa
-- Tipografia (fontes, tamanhos, pesos)
-- Design System: variáveis a implementar (CSS variables, Tailwind config, etc.)
-- Layout de cada tela principal
-- Componentes UI a criar
+Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 
-> Se o projeto não tem interface visual (API, CLI, daemon), o Designer documenta apenas: convenções de output no terminal, formato das respostas JSON, mensagens de erro padronizadas.
+**Crie `workspace/design-system.md`** — este arquivo é o **contrato visual** do projeto e é obrigatório. Sem ele, nenhuma tarefa de UI pode ser implementada. Siga o template definido em `agent/roles/designer.md`. Deve conter:
+- Todas as variáveis CSS com valores concretos (cores, tipografia, espaçamentos, bordas, sombras)
+- URL de import das fontes (Google Fonts ou sistema)
+- Lista completa de componentes base a criar em `components/ui/`
+- Layout descrito para cada tela principal
+
+**Atualize `workspace/PRD.md`** (seção Design) com:
+- Referências visuais do nicho (sites reais similares)
+- Intenção estética e mood do projeto
+- Resumo das decisões de design
+
+**Defina `visual_check_cmd`** para a seção `meta` do `prd.json` — um grep que confirma se as variáveis CSS estão aplicadas no projeto.
+
+> Se o projeto não tem interface visual (API, CLI, daemon): `has_ui: false`, `visual_check_cmd: null`. O Designer documenta apenas: convenções de output no terminal, formato das respostas JSON, mensagens de erro padronizadas.
 
 ---
 
@@ -73,7 +80,7 @@ Com base no PRD e stack, defina e documente em seção de design do `workspace/P
 
 **Gere `workspace/prd.json`.** O arquivo tem duas seções: `meta` (cabeçalho do projeto) e `tasks` (tarefas atômicas).
 
-### Seção `meta` (preenchida pelo Arquiteto)
+### Seção `meta` (preenchida pelo Arquiteto + Designer)
 
 ```json
 {
@@ -84,11 +91,16 @@ Com base no PRD e stack, defina e documente em seção de design do `workspace/P
     "check_cmd": "comando que valida se o código está correto (type check, compile check, etc.)",
     "test_cmd": "comando que roda os testes automatizados",
     "lint_cmd": "comando de lint/formatação (null se não aplicável)",
-    "run_cmd": "comando para rodar o projeto em dev"
+    "run_cmd": "comando para rodar o projeto em dev",
+    "has_ui": true,
+    "visual_check_cmd": "grep -c 'var(--color-primary)' apps/nome-do-projeto/app/globals.css"
   },
   "tasks": []
 }
 ```
+
+- `has_ui`: `true` se o projeto tem interface visual (web, mobile). `false` para API pura, CLI, daemon.
+- `visual_check_cmd`: comando que verifica se as variáveis CSS do Design System estão aplicadas. Deve retornar > 0. Exemplo: `grep -c "var(--color-primary)" apps/proj/app/globals.css`. Se `has_ui: false`, use `null`.
 
 **O `check_cmd` é crítico**: deve ser um comando rápido que falha se o código tiver erros básicos.
 - TypeScript: `cd apps/proj && yarn tsc --noEmit`
@@ -123,12 +135,15 @@ Com base no PRD e stack, defina e documente em seção de design do `workspace/P
 2. **Dependências** (install de tudo que será usado)
 3. **Configurações** (env vars, settings, config files)
 4. **Schema / modelo de dados** (migrations, ORM models)
-5. **Design System** (se houver UI: globals.css, componentes base)
-6. **Backend / lógica de negócio** (services, controllers, views, API routes)
-7. **Frontend / Interface** (uma tela/página por tarefa)
-8. **Integrações externas** (APIs, emails, pagamentos)
-9. **Testes** (uma tarefa por fluxo crítico)
-10. **Documentação** — SEMPRE última
+5. **Design System — globals.css** (se `has_ui: true`: OBRIGATÓRIO antes de qualquer tela — cria `app/globals.css` com TODAS as variáveis CSS de `workspace/design-system.md`)
+6. **Componentes base** (se `has_ui: true`: cria cada componente listado em `workspace/design-system.md` em `components/ui/`, um por tarefa)
+7. **Backend / lógica de negócio** (services, controllers, views, API routes)
+8. **Frontend / Interface** (uma tela/página por tarefa — SEMPRE após Design System e Componentes Base)
+9. **Integrações externas** (APIs, emails, pagamentos)
+10. **Testes** (uma tarefa por fluxo crítico)
+11. **Documentação** — SEMPRE última
+
+> **Regra de bloqueio**: nenhuma tarefa de Frontend/Interface pode ser criada antes das tarefas de Design System (globals.css) e Componentes Base. A ordem é lei.
 
 ---
 
@@ -137,6 +152,10 @@ Com base no PRD e stack, defina e documente em seção de design do `workspace/P
 Antes de finalizar, verifique item por item:
 
 - [ ] Seção `meta` do `prd.json` está completa com `check_cmd` e `test_cmd` válidos para a stack
+- [ ] `has_ui` está definido corretamente (`true` para projetos com interface, `false` para API/CLI)
+- [ ] Se `has_ui: true`: `visual_check_cmd` está definido e `workspace/design-system.md` foi criado
+- [ ] Se `has_ui: true`: existe tarefa de globals.css ANTES de qualquer tarefa de tela
+- [ ] Se `has_ui: true`: existe tarefa para cada componente base de `workspace/design-system.md`
 - [ ] Cada RF do PRD tem pelo menos uma tarefa no `prd.json`
 - [ ] A primeira tarefa é o setup do projeto
 - [ ] A última tarefa inclui testes

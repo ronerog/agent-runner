@@ -12,7 +12,8 @@ dist/
 # Environment and Secrets
 .env
 *.local
-.gemini/
+.gemini/*.json
+.gemini/*.key
 
 # Apps Subprojects
 # Only keep the apps directory structure, not the projects inside

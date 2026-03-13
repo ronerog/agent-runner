@@ -38,16 +38,18 @@ The agent now enforces three quality layers for any project with a visual interf
 
 ## Compatibility
 
-| IDE / Tool | Config file | Command |
-|-----------|-------------|---------|
-| **Windsurf** | `.windsurf/workflows/agent-runner.md` | `/agent-runner` |
-| **Cursor** | `.cursor/rules/agent-runner.mdc` | `/agent-runner` |
-| **Claude Code** | `CLAUDE.md` | `/agent-runner` |
-| **Gemini CLI** | `GEMINI.md` | `/agent-runner` |
-| **Cline / RooCode** | `.clinerules` | `/agent-runner` |
-| **GitHub Copilot** | `.github/copilot-instructions.md` | `/agent-runner` |
-| **Any IDE** | `agent/prompts/instructions.md` | paste the content into chat |
-| **Terminal** | `agent/scripts/start.sh` | see below |
+| IDE / Tool | Config file | Native invocation | How |
+|-----------|-------------|-------------------|-----|
+| **Windsurf** | `.windsurf/workflows/agent-runner.md` | `/agent-runner` | Native slash command via Workflows |
+| **Cursor** | `.cursor/rules/agent-runner.mdc` + `.cursor/commands/agent-runner.md` | `/agent-runner` | Commands directory (type `/` in chat) |
+| **Claude Code** | `CLAUDE.md` + `.claude/commands/agent-runner.md` | `/agent-runner` | Native slash command |
+| **Gemini CLI** | `GEMINI.md` + `.gemini/commands/agent-runner.toml` | `/agent_runner` | Custom slash command via TOML |
+| **Cline** | `.clinerules` | — | Context injected automatically |
+| **RooCode** | `.clinerules` + `.roo/commands/agent-runner.md` | `/agent-runner` | Custom commands directory |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | — | Context injected automatically (no custom slash commands) |
+| **Zed** | `CLAUDE.md` (auto-detected) | — | Context via rules file |
+| **Any IDE** | `agent/prompts/instructions.md` | — | Paste the content into chat |
+| **Terminal** | `agent/scripts/start.sh` | — | See below |
 
 ---
 
@@ -102,11 +104,16 @@ Project: [describe what you want to build]
 
 ```
 agent-runner/
-├── CLAUDE.md                  # Bootstrap for Claude Code
+├── CLAUDE.md                  # Bootstrap for Claude Code + Zed
 ├── GEMINI.md                  # Bootstrap for Gemini CLI
 ├── .clinerules                # Bootstrap for Cline/RooCode
-├── .cursor/rules/             # Bootstrap for Cursor
-├── .windsurf/workflows/       # Bootstrap for Windsurf
+├── .claude/commands/          # /agent-runner slash command (Claude Code)
+├── .cursor/rules/             # Context rules for Cursor
+├── .cursor/commands/          # /agent-runner slash command (Cursor)
+├── .gemini/commands/          # /agent_runner slash command (Gemini CLI)
+├── .roo/commands/             # /agent-runner custom command (RooCode)
+├── .windsurf/workflows/       # /agent-runner slash command (Windsurf)
+├── .agents/workflows/         # Generic agent workflow
 ├── .github/copilot-instructions.md  # Bootstrap for GitHub Copilot
 │
 ├── agent/

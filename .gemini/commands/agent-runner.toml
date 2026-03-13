@@ -1,0 +1,59 @@
+[agent_runner]
+description = "Inicia o Agent Runner — motor autônomo que constrói projetos do zero com o RALPH LOOP. Use: /agent-runner <descrição do projeto>"
+prompt = """
+Ao receber a descrição do projeto, execute o RALPH LOOP completo com autonomia total. Não peça confirmação em nenhuma etapa.
+
+PASSO 0 — CARREGAR CONTEXTO (OBRIGATÓRIO, SEMPRE)
+
+Leia nesta ordem exata antes de qualquer ação:
+1. workspace/memory/agent-brain.md — memória acumulada de todos os projetos
+2. workspace/memory/snapshots/latest.md — estado da sessão anterior (se existir)
+3. workspace/memory/global.md — regras globais do ambiente
+4. Se houver projeto ativo: workspace/memory/[projeto].md
+
+Só após ler o contexto acima, prossiga.
+
+PASSO 1 — FASE PLAN (única — não replaneie depois)
+
+Leia agent/prompts/plan.md e execute como time completo:
+Analista → Arquiteto → Designer → Task Breakdown
+
+Produza obrigatoriamente:
+- workspace/PRD.md — requisitos, personas, user stories, fluxo de telas
+- workspace/requirements/[projeto].md — lista detalhada de RFs e RNFs
+- workspace/prd.json — tarefas atômicas com instructions auto-suficientes
+- workspace/design-system.md — se has_ui: true: contrato visual completo
+
+O prd.json tem seção meta com os comandos da stack (check_cmd, test_cmd, lint_cmd, run_cmd, has_ui, visual_check_cmd).
+
+Regras do PLAN:
+- Nunca replaneie depois. O prd.json é lei (só adicione tarefas, nunca delete)
+- Se has_ui: true: tarefas de globals.css e components/ui/ ANTES de qualquer tela
+- Ao concluir: informe stack + nº de tarefas e inicie EXECUTE imediatamente
+
+PASSO 2 — FASE EXECUTE + VERIFY (loop por tarefa)
+
+Leia agent/prompts/execute.md e execute para cada tarefa pendente:
+1. Selecionar tarefa → status: "in_progress"
+2. Carregar contexto mínimo: agent-brain.md + instructions da tarefa + design-system.md (se UI)
+3. Implementar como Dev — sem TODOs, sem placeholders
+4. Verificar: executar meta.check_cmd → falha: corrigir (máx 3x) → blocked se falhar
+5. [SE tarefa de UI] executar visual_check_cmd + invocar visual-validator.md
+6. Verificar task.done_when objetivamente
+7. Executar lint_cmd e test_cmd se aplicável
+8. [A cada 3 tarefas de UI] Checkpoint PRD de conformidade visual
+9. Commit: bash agent/scripts/git_commit.sh "Task [id]: [nome]"
+10. Marcar status: "completed" no prd.json
+11. LEARN rápido: erro/padrão novo → agent-brain.md | nada → silêncio
+
+PASSO 3 — VALIDAÇÃO FINAL INTEGRADA
+
+Validação Técnica: check_cmd + test_cmd + Checklist de Segurança (agent/roles/qa.md)
+Validação Visual (se has_ui): visual-validator.md — todas as telas, todas as variáveis CSS
+
+PASSO 4 — LEARN GLOBAL
+
+Leia agent/prompts/learn.md e atualize workspace/memory/agent-brain.md com padrões e aprendizados.
+
+Para retomar sessão anterior: leia agent/prompts/resume.md + workspace/memory/snapshots/latest.md
+"""

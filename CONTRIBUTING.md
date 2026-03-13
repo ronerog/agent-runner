@@ -1,132 +1,132 @@
-# Contribuindo para o Agent Runner 🧠
+# Contributing to Agent Runner 🧠
 
-Bem-vindo! O Agent Runner é um **Organismo Coletivo** — quanto mais pessoas usam e compartilham o que o agente aprendeu, mais inteligente ele fica para todo mundo.
+Welcome! Agent Runner is a **Collective Organism** — the more people use it and share what the agent learned, the smarter it gets for everyone.
 
-Existem duas formas de contribuir: compartilhando **Sabedoria** (o mais valioso) ou melhorando o **Motor**.
+There are two ways to contribute: sharing **Wisdom** (the most valuable) or improving the **Engine**.
 
 ---
 
-## 🧠 1. Compartilhando Sabedoria (Agent Brain)
+## 🧠 1. Sharing Wisdom (Agent Brain)
 
-### O que é o Agent Brain?
+### What is the Agent Brain?
 
-Quando você usa o Agent Runner para construir um projeto, o agente aprende empiricamente: erros que encontrou, padrões que funcionaram, configurações de stack que deram problema, decisões arquiteturais que se mostraram corretas.
+When you use Agent Runner to build a project, the agent learns empirically: errors it encountered, patterns that worked, stack configurations that caused problems, architectural decisions that proved correct.
 
-Tudo isso fica registrado em **`workspace/memory/agent-brain.md`** — a memória acumulada do agente.
+All of this is recorded in **`workspace/memory/agent-brain.md`** — the agent's accumulated memory.
 
-Esse arquivo **já é versionado pelo git** do seu repositório. Contribuir com sabedoria é basicamente abrir um PR com o que o agente aprendeu no seu uso.
+This file **is already tracked by git** in your repository. Contributing wisdom is essentially opening a PR with what the agent learned during your use.
 
-### O que vale a pena contribuir?
+### What is worth contributing?
 
-Contribuições valiosas para o `agent-brain.md` incluem:
+Valuable contributions to `agent-brain.md` include:
 
-- **Erros de stack resolvidos**: "No Next.js 15 com App Router, Server Actions não podem retornar `undefined` diretamente — use `null`"
-- **Padrões de instalação**: "Django + Channels requer `daphne` como ASGI server, não o servidor padrão"
-- **Anti-padrões descobertos**: "Nunca usar `prisma.$executeRaw` em loops — causa N+1 de queries"
-- **Configurações críticas**: "Go modules com workspaces (`go.work`) resolvem conflitos de versão em monorepos"
-- **Sequências que funcionam**: "Em FastAPI, sempre inicializar o banco antes dos routers no `lifespan`"
+- **Resolved stack errors**: "In Next.js 15 with App Router, Server Actions cannot return `undefined` directly — use `null`"
+- **Installation patterns**: "Django + Channels requires `daphne` as the ASGI server, not the default server"
+- **Discovered anti-patterns**: "Never use `prisma.$executeRaw` in loops — causes N+1 queries"
+- **Critical configurations**: "Go modules with workspaces (`go.work`) resolve version conflicts in monorepos"
+- **Sequences that work**: "In FastAPI, always initialize the database before routers in `lifespan`"
 
-### Como contribuir
+### How to contribute
 
-**Passo 1 — Use o Agent Runner em um projeto**
+**Step 1 — Use Agent Runner on a project**
 ```bash
-# No seu projeto, via IDE (Windsurf, Cursor, etc.):
-/agent-runner: Crie um [seu projeto]
+# In your project, via IDE (Windsurf, Cursor, etc.):
+/agent-runner: Build a [your project]
 ```
 
-**Passo 2 — Veja o que o agente aprendeu**
+**Step 2 — See what the agent learned**
 
-Após concluir o projeto, o arquivo `workspace/memory/agent-brain.md` terá sido atualizado automaticamente pelo papel Learner. Revise as entradas novas — especialmente nas seções "Padrões Aprendidos" e "Anti-Padrões Conhecidos".
+After completing the project, the `workspace/memory/agent-brain.md` file will have been automatically updated by the Learner role. Review the new entries — especially in the "Learned Patterns" and "Known Anti-Patterns" sections.
 
-**Passo 3 — Faça Fork e abra um PR**
+**Step 3 — Fork and open a PR**
 
 ```bash
-# Fork o repositório no GitHub, depois:
-git clone https://github.com/SEU-USUARIO/agent-runner.git
+# Fork the repository on GitHub, then:
+git clone https://github.com/YOUR-USERNAME/agent-runner.git
 cd agent-runner
-git checkout -b brain/[stack-ou-tema]
+git checkout -b brain/[stack-or-topic]
 ```
 
-**Passo 4 — Copie as entradas relevantes**
+**Step 4 — Copy the relevant entries**
 
-Abra seu `workspace/memory/agent-brain.md` local e copie as entradas novas para o `workspace/memory/agent-brain.md` do repositório forkado.
+Open your local `workspace/memory/agent-brain.md` and copy the new entries into the `workspace/memory/agent-brain.md` of the forked repository.
 
-Use o formato padrão:
+Use the standard format:
 
 ```markdown
-### [Categoria]: [Título do Aprendizado]
-- **Problema**: O que aconteceu
-- **Causa-raiz**: Por que aconteceu
-- **Solução**: O que resolveu o problema
-- **Regra**: "Sempre [faça X]" ou "Nunca [faça Y]"
-- **Projeto**: [tipo de projeto — não precisa ser o nome real] | **Data**: [YYYY-MM-DD]
+### [Category]: [Learning Title]
+- **Problem**: What happened
+- **Root cause**: Why it happened
+- **Solution**: What solved the problem
+- **Rule**: "Always [do X]" or "Never [do Y]"
+- **Project**: [project type — no need for the real name] | **Date**: [YYYY-MM-DD]
 ```
 
-Categorias aceitas: `Next.js`, `Python`, `Django`, `FastAPI`, `Go`, `Rust`, `Ruby/Rails`, `Prisma`, `TypeScript`, `Auth`, `Deploy`, `Planejamento`, `QA`, `Arquitetura`, `Docker`, `Banco de Dados`.
+Accepted categories: `Next.js`, `Python`, `Django`, `FastAPI`, `Go`, `Rust`, `Ruby/Rails`, `Prisma`, `TypeScript`, `Auth`, `Deploy`, `Planning`, `QA`, `Architecture`, `Docker`, `Database`.
 
-**Passo 5 — Abra o Pull Request**
+**Step 5 — Open the Pull Request**
 
 ```bash
 git add workspace/memory/agent-brain.md
-git commit -m "brain: add [categoria] learnings from [tipo de projeto]"
-git push origin brain/[stack-ou-tema]
+git commit -m "brain: add [category] learnings from [project type]"
+git push origin brain/[stack-or-topic]
 ```
 
-Abra o PR com o título: `brain: [o que foi aprendido em poucas palavras]`
+Open the PR with the title: `brain: [what was learned in a few words]`
 
-### O que NÃO contribuir
+### What NOT to contribute
 
-- Informações de projetos privados (nomes de clientes, dados sensíveis)
-- Opiniões sem evidência prática ("acho que X é melhor que Y")
-- Duplicatas de entradas que já existem no `agent-brain.md`
-- Entradas sem o campo `Regra` — o que aprende deve virar regra acionável
+- Information from private projects (client names, sensitive data)
+- Opinions without practical evidence ("I think X is better than Y")
+- Duplicates of entries that already exist in `agent-brain.md`
+- Entries without the `Rule` field — what is learned must become an actionable rule
 
 ---
 
-## 💻 2. Melhorando o Motor (Engine)
+## 💻 2. Improving the Engine
 
-Se encontrou um problema no fluxo do agente ou quer adicionar capacidade:
+If you found a problem in the agent's flow or want to add capability:
 
-### Onde cada coisa fica
+### Where each thing lives
 
-| O que melhorar | Onde mexer |
-|----------------|-----------|
-| O pipeline geral (RALPH LOOP) | `agent/prompts/instructions.md` |
-| Fase de planejamento | `agent/prompts/plan.md` |
-| Fase de execução por tarefa | `agent/prompts/execute.md` |
-| Fase de aprendizado | `agent/prompts/learn.md` |
-| Retomada de sessão | `agent/prompts/resume.md` |
-| Papel do Analista | `agent/roles/analyst.md` |
-| Papel do Arquiteto | `agent/roles/architect.md` |
-| Papel do Designer | `agent/roles/designer.md` |
-| Papel do Desenvolvedor | `agent/roles/dev.md` |
-| Papel do QA | `agent/roles/qa.md` |
-| Papel do Learner | `agent/roles/learner.md` |
-| Papel do Manager | `agent/roles/manager.md` |
-| Scripts de automação | `agent/scripts/` |
-| Novo papel (ex: SRE, Security) | `agent/roles/[novo-papel].md` |
+| What to improve | Where to edit |
+|----------------|---------------|
+| The overall pipeline (RALPH LOOP) | `agent/prompts/instructions.md` |
+| Planning phase | `agent/prompts/plan.md` |
+| Per-task execution phase | `agent/prompts/execute.md` |
+| Learning phase | `agent/prompts/learn.md` |
+| Session resume | `agent/prompts/resume.md` |
+| Analyst role | `agent/roles/analyst.md` |
+| Architect role | `agent/roles/architect.md` |
+| Designer role | `agent/roles/designer.md` |
+| Developer role | `agent/roles/dev.md` |
+| QA role | `agent/roles/qa.md` |
+| Learner role | `agent/roles/learner.md` |
+| Manager role | `agent/roles/manager.md` |
+| Automation scripts | `agent/scripts/` |
+| New role (e.g. SRE, Security) | `agent/roles/[new-role].md` |
 
-### Fluxo de contribuição
+### Contribution flow
 
 ```bash
-git checkout -b feat/minha-melhoria
-# faça suas alterações
-git commit -m "feat: [descrição]"
-git push origin feat/minha-melhoria
-# abra Pull Request
+git checkout -b feat/my-improvement
+# make your changes
+git commit -m "feat: [description]"
+git push origin feat/my-improvement
+# open Pull Request
 ```
 
-Padrão de commits:
-- `feat:` nova funcionalidade no motor
-- `fix:` correção de bug no fluxo
-- `brain:` contribuição de sabedoria ao agent-brain
-- `role:` melhoria em um papel específico
-- `chore:` manutenção geral
+Commit conventions:
+- `feat:` new feature in the engine
+- `fix:` bug fix in the flow
+- `brain:` wisdom contribution to agent-brain
+- `role:` improvement to a specific role
+- `chore:` general maintenance
 
 ---
 
-## ⚖️ Licença
+## ⚖️ License
 
-Ao contribuir — seja código ou sabedoria — você concorda que sua contribuição será licenciada sob a **GNU AGPLv3**. Isso garante que o Agent Runner e toda a inteligência acumulada permaneçam livres e acessíveis para sempre.
+By contributing — whether code or wisdom — you agree that your contribution will be licensed under the **GNU AGPLv3**. This ensures that Agent Runner and all its accumulated intelligence remain free and accessible forever.
 
-**Obrigado por tornar o agente mais inteligente para todo mundo.**
+**Thank you for making the agent smarter for everyone.**

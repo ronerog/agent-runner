@@ -1,125 +1,125 @@
-# Agent Runner — Agente de Desenvolvimento Autônomo
+# Agent Runner — Autonomous Development Agent
 
-**Agent Runner** é um motor de execução agentivo que transforma requisitos em software funcional, operando como um time completo de engenharia — e aprendendo empiricamente com cada projeto construído.
+**Agent Runner** is an agentic execution engine that transforms requirements into functional software, operating as a full engineering team — and learning empirically from every project it builds.
 
-Funciona em **qualquer IDE com IA** e **qualquer modelo de linguagem**.
-
----
-
-## Como Funciona — RALPH LOOP
-
-```
-PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tarefas → LEARN GLOBAL
-```
-
-O agente planeja uma única vez, depois executa tarefa por tarefa em loop, aprendendo com cada ciclo. O conhecimento acumulado persiste em `workspace/memory/agent-brain.md` e melhora cada projeto subsequente.
-
-| Papel | Responsabilidade |
-|-------|-----------------|
-| Analista | Transforma ideias em PRDs, deduz features implícitas |
-| Arquiteto | Escolhe a stack certa, modela os dados, define estrutura |
-| Designer | Design System, paleta, layouts — adaptado ao nicho |
-| Desenvolvedor | Implementa com autonomia total, qualquer linguagem |
-| QA | Valida após cada tarefa, nunca avança com falhas |
-| Learner | Extrai padrões, atualiza a memória do agente |
-| Manager | Consolida contexto quando a sessão satura |
+Works with **any AI-powered IDE** and **any language model**.
 
 ---
 
-## Compatibilidade
+## How It Works — RALPH LOOP
 
-| IDE / Ferramenta | Arquivo de config | Comando |
-|-----------------|-------------------|---------|
+```
+PLAN (1x) → [EXECUTE → VERIFY → LEARN] × N tasks → LEARN GLOBAL
+```
+
+The agent plans once, then executes task by task in a loop, learning with every cycle. Accumulated knowledge persists in `workspace/memory/agent-brain.md` and improves every subsequent project.
+
+| Role | Responsibility |
+|------|---------------|
+| Analyst | Transforms ideas into PRDs, deduces implicit features |
+| Architect | Chooses the right stack, models data, defines structure |
+| Designer | Design System, palette, layouts — adapted to the niche |
+| Developer | Implements with full autonomy, any language |
+| QA | Validates after each task, never advances with failures |
+| Learner | Extracts patterns, updates the agent's memory |
+| Manager | Consolidates context when the session window saturates |
+
+---
+
+## Compatibility
+
+| IDE / Tool | Config file | Command |
+|-----------|-------------|---------|
 | **Windsurf** | `.windsurf/workflows/agent-runner.md` | `/agent-runner` |
 | **Cursor** | `.cursor/rules/agent-runner.mdc` | `/agent-runner` |
 | **Claude Code** | `CLAUDE.md` | `/agent-runner` |
 | **Gemini CLI** | `GEMINI.md` | `/agent-runner` |
 | **Cline / RooCode** | `.clinerules` | `/agent-runner` |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | `/agent-runner` |
-| **Qualquer IDE** | `agent/prompts/instructions.md` | cole o conteúdo no chat |
-| **Terminal** | `agent/scripts/start.sh` | veja abaixo |
+| **Any IDE** | `agent/prompts/instructions.md` | paste the content into chat |
+| **Terminal** | `agent/scripts/start.sh` | see below |
 
 ---
 
-## Como Usar
+## How to Use
 
-### Em IDEs (Windsurf, Cursor, Claude Code, etc.)
+### In IDEs (Windsurf, Cursor, Claude Code, etc.)
 
-Abra o repositório na IDE e use o comando:
+Open the repository in your IDE and use the command:
 
 ```
-/agent-runner: Crie um [descreva seu projeto]
+/agent-runner: Build a [describe your project]
 ```
 
-Para retomar uma sessão anterior:
+To resume a previous session:
 ```
-continuar
+continue
 ```
 
-### No Terminal
+### In the Terminal
 
-O `start.sh` gera o prompt de bootstrap e pode ser passado para qualquer AI CLI:
+`start.sh` generates the bootstrap prompt and can be piped into any AI CLI:
 
 ```bash
 # Claude Code CLI
-claude "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+claude "$(./agent/scripts/start.sh 'Build a medical scheduling SaaS')"
 
 # Aider
-aider --message "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+aider --message "$(./agent/scripts/start.sh 'Build a medical scheduling SaaS')"
 
 # Gemini CLI
-gemini "$(./agent/scripts/start.sh 'Crie um SaaS de agendamento médico')"
+gemini "$(./agent/scripts/start.sh 'Build a medical scheduling SaaS')"
 
-# Retomar sessão anterior
+# Resume a previous session
 claude "$(./agent/scripts/start.sh)"
 ```
 
-Ou rode diretamente se o prd.json já existe:
+Or run directly if prd.json already exists:
 ```bash
 bash agent/scripts/agent_run.sh
 ```
 
-### Em qualquer IDE sem suporte a workflows
+### In any IDE without workflow support
 
-Cole o conteúdo de `agent/prompts/instructions.md` no início da conversa, seguido de:
+Paste the contents of `agent/prompts/instructions.md` at the start of the conversation, followed by:
 ```
-Projeto: [descreva o que quer construir]
+Project: [describe what you want to build]
 ```
 
 ---
 
-## Estrutura
+## Structure
 
 ```
 agent-runner/
-├── CLAUDE.md                  # Bootstrap para Claude Code
-├── GEMINI.md                  # Bootstrap para Gemini CLI
-├── .clinerules                # Bootstrap para Cline/RooCode
-├── .cursor/rules/             # Bootstrap para Cursor
-├── .windsurf/workflows/       # Bootstrap para Windsurf
-├── .github/copilot-instructions.md  # Bootstrap para GitHub Copilot
+├── CLAUDE.md                  # Bootstrap for Claude Code
+├── GEMINI.md                  # Bootstrap for Gemini CLI
+├── .clinerules                # Bootstrap for Cline/RooCode
+├── .cursor/rules/             # Bootstrap for Cursor
+├── .windsurf/workflows/       # Bootstrap for Windsurf
+├── .github/copilot-instructions.md  # Bootstrap for GitHub Copilot
 │
 ├── agent/
-│   ├── roles/                 # Os 7 papéis do time
+│   ├── roles/                 # The 7 team roles
 │   ├── prompts/               # RALPH LOOP: instructions, plan, execute, learn, resume
 │   └── scripts/               # start.sh (terminal), agent_run.sh, git_commit.sh, run_checks.sh
 │
-├── apps/                      # Projetos gerados (monorepo)
+├── apps/                      # Generated projects (monorepo)
 │
 └── workspace/
     ├── memory/
-    │   ├── agent-brain.md     # Memória cross-project do agente (cresce com o uso)
-    │   ├── global.md          # Regras globais do ambiente
-    │   └── snapshots/         # Estado de sessões anteriores
-    ├── requirements/          # Requisitos detalhados por projeto
-    └── PRD.md                 # PRD do projeto atual
+    │   ├── agent-brain.md     # Agent's cross-project memory (grows with use)
+    │   ├── global.md          # Global environment rules
+    │   └── snapshots/         # Previous session state
+    ├── requirements/          # Detailed requirements per project
+    └── PRD.md                 # Current project PRD
 ```
 
 ---
 
-## Stacks Suportadas
+## Supported Stacks
 
-O Arquiteto escolhe a stack ideal para cada projeto. O agente domina qualquer linguagem:
+The Architect chooses the ideal stack for each project. The agent is fluent in any language:
 
 **JavaScript / TypeScript** — Next.js, React, Node.js, NestJS, Bun
 **Python** — Django, FastAPI, Flask
@@ -133,41 +133,41 @@ O Arquiteto escolhe a stack ideal para cada projeto. O agente domina qualquer li
 
 ---
 
-## Requisitos
+## Requirements
 
-- **Node.js 18+** e **Yarn** (para projetos JS/TS)
-- **Runtime da stack escolhida** (Python, Go, Rust, etc. — conforme o projeto)
-- **jq** (opcional — usado pelo `run_checks.sh` para ler o `prd.json`)
+- **Node.js 18+** and **Yarn** (for JS/TS projects)
+- **Runtime for the chosen stack** (Python, Go, Rust, etc. — as needed per project)
+- **jq** (optional — used by `run_checks.sh` to read `prd.json`)
 - **Git**
 
 ---
 
-## Contribuindo
+## Contributing
 
-Ao usar o Agent Runner, ele acumula sabedoria em `workspace/memory/agent-brain.md`. Compartilhe esse conhecimento de volta — veja [CONTRIBUTING.md](./CONTRIBUTING.md).
+As you use Agent Runner, it accumulates wisdom in `workspace/memory/agent-brain.md`. Share that knowledge back — see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-## Licença
+## License
 
-**GNU AGPLv3** — Melhorias ficam abertas. Evolução coletiva.
+**GNU AGPLv3** — Improvements stay open. Collective evolution.
 
 Copyright (c) 2026 ronerog
 
 ---
 
-## Aviso Importante — Leia Antes de Usar
+## Important Notice — Please Read Before Using
 
-O Agent Runner é uma **ferramenta de estudo e experimentação**. Ele foi criado para ajudar pessoas a aprender e construir projetos com o apoio de IA, mas opera com autonomia — o que significa que você, o usuário, é responsável por supervisionar tudo o que ele faz.
+Agent Runner is a **learning and experimentation tool**. It was built to help people learn and build projects with AI assistance, but it operates autonomously — which means you, the user, are responsible for supervising everything it does.
 
-**Você é o engenheiro.** A IA é seu assistente, não o contrário.
+**You are the engineer.** The AI is your assistant, not the other way around.
 
-Algumas coisas que você deve sempre fazer:
+A few things you should always do:
 
-- **Revise o código gerado** antes de subir para produção. O agente pode cometer erros, usar abordagens desatualizadas ou interpretar requisitos de forma inesperada.
-- **Nunca rode em produção sem revisão.** Especialmente operações de banco de dados — migrações, deleções e resets podem ser irreversíveis.
-- **Verifique as dependências instaladas.** O agente tenta usar pacotes conhecidos e seguros, mas a responsabilidade final de auditar o que entra no seu projeto é sua.
-- **Guarde backups dos seus dados.** Antes de qualquer projeto que interaja com dados reais, faça backup.
-- **Não use em sistemas críticos sem supervisão técnica** (saúde, jurídico, financeiro, infraestrutura).
+- **Review the generated code** before pushing to production. The agent can make mistakes, use outdated approaches, or misinterpret requirements.
+- **Never deploy to production without review.** Especially database operations — migrations, deletions, and resets can be irreversible.
+- **Check the installed dependencies.** The agent tries to use well-known and safe packages, but the final responsibility for auditing what goes into your project is yours.
+- **Keep backups of your data.** Before any project that interacts with real data, make a backup.
+- **Do not use in critical systems without technical supervision** (healthcare, legal, financial, infrastructure).
 
-O Agent Runner tem boas práticas de segurança embutidas (sem hardcode de secrets, hashing de senhas, validação de inputs, etc.), mas nenhuma ferramenta automatizada substitui a revisão humana. Use com curiosidade, aprenda com o processo, e sempre questione o que foi gerado.
+Agent Runner has built-in security practices (no hardcoded secrets, password hashing, input validation, etc.), but no automated tool replaces human review. Use it with curiosity, learn from the process, and always question what was generated.
 
-**Divirta-se construindo — só não esqueça de olhar o que está sendo construído.** 🙂
+**Have fun building — just don't forget to look at what's being built.** 🙂

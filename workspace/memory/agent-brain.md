@@ -42,7 +42,29 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 
 ## Padrões Aprendidos
 
-*(Populado automaticamente pelo Learner após cada projeto.)*
+### Multi-Tenant SaaS (Subdomain Routing)
+- Next.js middleware is the right place to handle subdomain → path rewriting
+- Pattern: extract subdomain from `request.headers.get('host')`, rewrite to `/[tenant-path]/[slug]/*`
+- Always use `NEXT_PUBLIC_PLATFORM_DOMAIN` env var for the root domain to support both dev and prod
+- Public pages (gifts, RSVP, wedding home) need `AllowAny` permission on DRF views
+
+### Django with Email Auth
+- Always create `CustomUserManager` with `create_user` (normalizes email) and `create_superuser`
+- Set `USERNAME_FIELD = 'email'` and `REQUIRED_FIELDS = ['name']`
+- Register with `BaseUserAdmin` using custom `fieldsets` and `add_fieldsets`
+- `AUTH_USER_MODEL = 'accounts.User'` in base settings before any migration
+
+### Django App Structure
+- Use `apps/` prefix for all Django apps in `INSTALLED_APPS`: `'apps.accounts'`, etc.
+- Each app needs `__init__.py` and `apps.py` with `AppConfig`
+- `config/settings/base.py` + `config/settings/dev.py` split is clean and reliable
+- Always declare `DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'` in base settings
+
+### Next.js Auth with JWT
+- Store access + refresh tokens in `localStorage` (keys: `access_token`, `refresh_token`)
+- Axios request interceptor: attach `Authorization: Bearer` header
+- Axios response interceptor: catch 401, try refresh, retry request, redirect on failure
+- `AuthContext` with `useAuth()` hook; wrap only necessary subtrees (not global root) with `AuthProvider`
 
 ---
 
@@ -56,7 +78,7 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 
 | Projeto | Stack | Data | Tarefas | Concluídas | Bloqueadas | Aprendizados |
 |---------|-------|------|---------|------------|------------|--------------|
-| *(nenhum ainda)* | — | — | — | — | — | — |
+| wedding-platform | Next.js 15 + Django 5 + PostgreSQL + Redis + Docker | 2026-03-12 | 33 | 33 | 0 | Multi-tenant subdomain routing via Next.js middleware; Django custom User with email auth; UUID primary keys on all models; JWT in localStorage with axios interceptors |
 
 ---
 

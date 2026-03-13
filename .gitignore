@@ -32,3 +32,4 @@ workspace/prd.json
 # Tools and Editor files
 .DS_Store
 Thumbs.db
+.claude/settings.local.json

@@ -8,19 +8,36 @@ Definir a stack mais adequada para o projeto e a estrutura que o Dev vai seguir.
 
 ## Decisão de Stack — Critérios
 
-Escolha a stack com base no problema, não por hábito. Considere:
+Escolha a stack com base no problema, não por hábito. Consulte também `workspace/memory/agent-brain.md` seção "Stack Expertise" antes de decidir.
 
 | Critério | Implicação |
 |----------|-----------|
-| Muita lógica de UI + SEO + full-stack integrado | Next.js / Nuxt.js |
-| API REST de alta performance e baixo consumo | Go (Chi, Gin) ou Rust (Axum) |
-| Processamento de dados, ML, análise | Python (FastAPI, Django) |
-| App web tradicional com admin rico | Django (Python) ou Rails (Ruby) |
-| Microserviço de alto volume | Go, Rust, ou Java/Spring |
+| Full-stack web com UI rica + SEO + Server Components | Next.js 15 + TypeScript + Prisma |
+| API REST pura (sem UI) + alto volume + baixo consumo | Go (Chi, Gin) ou Rust (Axum) |
+| API REST com autenticação + ORM poderoso + médio volume | FastAPI (Python) + SQLAlchemy 2.0 |
+| Processamento de dados, ML, pipelines | Python (FastAPI ou Django) |
+| App web tradicional com admin rico + painel de gestão | Django + DRF (Python) |
+| Microserviço de alto volume, latência crítica | Go, Rust, ou Java/Spring |
+| API backend corporativo com CQRS/event-driven | NestJS (TypeScript) |
 | CLI tool | Rust, Go, ou Python |
-| App mobile cross-platform | React Native ou Flutter |
-| Monolito corporativo | Java/Spring Boot ou C#/ASP.NET |
-| Prototipagem rápida | Python/Flask ou Ruby/Rails |
+| App mobile cross-platform | React Native (JS/TS) ou Flutter (Dart) |
+| Monolito corporativo + time Java | Java/Spring Boot ou C#/ASP.NET |
+| Prototipagem rápida sem requisito de escala | Python/Flask ou Ruby/Rails |
+
+**Decisão de Banco de Dados:**
+| Critério | Implicação |
+|----------|-----------|
+| Dados relacionais + transações | PostgreSQL (padrão para novos projetos) |
+| Alta velocidade de escrita, dados de log/evento | PostgreSQL com particionamento ou ClickHouse |
+| Sessões, cache, pub/sub, filas | Redis |
+| Documentos flexíveis, sem schema fixo | MongoDB (apenas quando realmente necessário) |
+| Desenvolvimento local simples, sem Docker | SQLite (dev only) → PostgreSQL (prod) |
+| Busca full-text avançada | PostgreSQL + pg_tsvector, ou Elasticsearch |
+
+**Decisão de Monolito vs Microsserviços:**
+- **Regra**: comece com monolito. Microsserviços para problemas de escala já manifestados.
+- Monolito modular (módulos bem separados) escala bem até times de 10+ pessoas.
+- Microsserviços apenas se: times independentes por serviço, escala diferenciada, ou isolamento de falhas é requisito de negócio.
 
 ## Responsabilidades
 
@@ -76,6 +93,45 @@ Java/Spring Boot (Maven):
   lint_cmd:  null
   run_cmd:   "cd apps/proj && ./mvnw spring-boot:run"
 ```
+
+## Padrões de Arquitetura — Quando Aplicar
+
+### Clean Architecture (quando o projeto é complexo)
+- Use quando: múltiplas integrações externas, lógica de negócio rica, ou necessidade de trocar banco/framework.
+- Camadas: `domain/` (entidades + regras) → `use-cases/` (orquestra) → `adapters/` (controllers, repos) → `infrastructure/` (DB, HTTP, frameworks).
+- Regra de dependência: código interno NUNCA importa código externo.
+
+### Repository Pattern (padrão — usar sempre)
+- A lógica de negócio não deve conhecer SQL ou o ORM. Defina uma interface de repositório por entidade.
+- Benefício direto: testes com mock do repositório sem banco real.
+- Em NestJS: classe com `@InjectRepository`. Em Go: interface + struct. Em Django: Manager customizado.
+
+### CQRS (quando leitura e escrita divergem)
+- Use quando: queries de leitura precisam de JOINs complexos enquanto writes são simples, ou carga de leitura é 10x a de escrita.
+- Separe `CommandHandlers` (mudam estado) de `QueryHandlers` (retornam dados).
+- Em NestJS: `@nestjs/cqrs`. Em Go: handlers separados por operação.
+
+### Event-Driven (quando side effects são desacoplados)
+- Use quando: uma ação desencadeia múltiplas reações independentes (ex: criar usuário → enviar email + criar perfil + auditoria).
+- Redis Pub/Sub para volume baixo. RabbitMQ para garantia de entrega. Kafka para streaming de alto volume.
+
+## Modelagem de Dados — Decisões
+
+### IDs
+- **UUID (gen_random_uuid())**: padrão para entidades expostas em APIs. Não vaza contagem.
+- **BIGSERIAL**: tabelas de log, eventos, filas internas com bilhões de registros.
+
+### Soft Delete
+- Adicione `deleted_at TIMESTAMP NULL DEFAULT NULL` quando: auditoria obrigatória, LGPD, relações devem sobreviver à exclusão.
+- Documente na seção técnica do PRD quando soft delete é requisito.
+
+### Auditoria
+- Para projetos com requisito de rastreabilidade: tabela `audit_log (entity, entity_id, action, actor_id, timestamp, old_values jsonb, new_values jsonb)`.
+- Documente como RF explícito se o cliente pediu histórico de alterações.
+
+### Indexes (documente no schema)
+- FK + colunas de filtro frequente + colunas de ordenação → sempre indexadas.
+- Documente os índices no schema do PRD.
 
 ## Decisões de Segurança Arquitetural
 

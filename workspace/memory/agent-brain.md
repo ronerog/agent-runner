@@ -40,6 +40,386 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 
 ---
 
+## Stack Expertise — Conhecimento Especializado
+
+> Este bloco contém padrões avançados que uma IA genérica erraria ou deixaria desatualizados.
+> Leia a seção relevante **antes de qualquer decisão técnica** naquela stack.
+
+---
+
+### Next.js 15 — App Router
+
+**Server vs Client Components:**
+- Default: tudo é Server Component. `'use client'` apenas quando necessário: hooks, eventos, state, browser APIs.
+- `'use server'` marca Server Actions (mutations em forms). Nunca em layout.tsx — quebra streaming de toda a árvore.
+- Componentes Server podem importar Client, mas não o contrário. Passe Server Components como `children` para Client Components quando necessário.
+
+**Data Fetching:**
+- `fetch()` em Server Components → cache automático por padrão.
+  - `{ cache: 'no-store' }` → dinâmico (sem cache, equivale a SSR).
+  - `{ next: { revalidate: 60 } }` → ISR (revalida a cada N segundos).
+  - `{ next: { tags: ['products'] } }` → revalidação por tag.
+- `revalidateTag('products')` em Server Action → invalida por tag (mais preciso que `revalidatePath`).
+- **TanStack Query** para client-side fetching, mutations, refetch, retry, e optimistic updates.
+- Nunca `useEffect + fetch` em Client Components — use TanStack Query.
+
+**Roteamento Avançado:**
+- `(group)/` → Route Group: organiza sem afetar URL.
+- `@slot/` → Parallel Routes: dashboards com seções independentes ou modais com URL própria.
+- `(.)route/` → Intercepting Route: exibe rota como modal sem sair da página atual.
+- `loading.tsx` → Suspense automático + skeleton. `error.tsx` → Error Boundary. `not-found.tsx` → 404.
+- `route.ts` → Route Handler (substitui API Routes do pages router).
+
+**SEO e Metadata:**
+- `export async function generateMetadata({ params }): Promise<Metadata>` em cada page.tsx.
+- `generateStaticParams()` para pre-render de rotas dinâmicas em build.
+- Nunca `<Head>` do pages router no App Router.
+
+**Fontes e Imagens:**
+- Sempre `next/font/google` em `layout.tsx` root — nunca `<link>` do Google Fonts (performance + CLS).
+- Sempre `next/image` com `alt`, `width`+`height` ou `fill`. `priority` no LCP. `sizes` para responsividade.
+
+**Auth (Auth.js v5 / NextAuth):**
+- `auth()` do `@auth/nextjs` para sessão em Server Components sem prop drilling.
+- `middleware.ts`: `export { auth as middleware } from '@/auth'` para proteger rotas.
+- Nunca JWT em localStorage — Auth.js usa httpOnly cookies por padrão (seguro contra XSS).
+- `session.strategy: 'jwt'` para edge runtime; `'database'` para sessões persistentes.
+
+**Erros comuns de IAs genéricas com Next.js:**
+- Usar `getServerSideProps`/`getStaticProps` — são do pages router, não do App Router.
+- Colocar `'use client'` no layout.tsx — quebra SSR de toda a árvore.
+- Usar `useEffect + fetch` para buscar dados — use Server Components ou TanStack Query.
+- Ignorar `loading.tsx` e `error.tsx` — são convenções automáticas do App Router.
+- Usar `<img>` em vez de `next/image` — sem otimização automática.
+
+---
+
+### React — Estado e Composição
+
+**Regra de Estado por Tipo:**
+- **Server state** (dados do servidor): **TanStack Query** — cache, stale-while-revalidate, retry, mutations.
+- **Global client state** (tema, auth, carrinho): **Zustand** — stores simples, colocáveis, sem boilerplate.
+- **Local UI state** (modal aberto, tab ativa): `useState`.
+- **URL state** (filtros, paginação, busca): `useSearchParams` + `router.push/replace`.
+- **Form state**: **React Hook Form** + **Zod** para validação tipada.
+- Redux apenas em sistemas corporativos com times grandes e middleware complexo.
+
+**Hooks Avançados:**
+- `useDeferredValue(value)` → adia re-render de resultado pesado durante digitação (sem lag no input).
+- `useOptimistic(state, updateFn)` → UI otimista para Server Actions (Next.js 15+).
+- `useId()` → gera ID único para labels/inputs acessíveis (seguro no SSR).
+- `useTransition()` → marca updates como não-urgentes, mantém UI responsiva.
+- `useSyncExternalStore` → para integrações com stores externos (localStorage, WebSocket).
+
+**Composição:**
+- `children` e `renderProp` em vez de prop drilling além de 2 níveis.
+- Context apenas para dados globais estáveis (tema, locale, auth). Para dados dinâmicos → Zustand.
+- `asChild` (Radix UI Slot) para componentes polimórficos sem wrappers desnecessários.
+- `forwardRef` obrigatório em todos componentes UI que precisam de ref.
+- `cva` (class-variance-authority) para variantes de componentes com Tailwind.
+
+---
+
+### NestJS — Módulos e Pipeline
+
+**Estrutura de Módulos:**
+- `AppModule` → raiz, importa todos os feature modules.
+- `CoreModule` → global (`isGlobal: true`): Logger, Config, HTTP clients. Importado uma vez.
+- `SharedModule` → serviços reutilizáveis; re-exports o que outros módulos precisam.
+- Feature modules (`UserModule`, `AuthModule`) → autocontidos: controller, service, repository, DTOs.
+- **Regra**: nunca injete serviço de módulo A em B sem `exports` no módulo A.
+
+**Pipeline de Requisição (ordem exata):**
+```
+Middleware → Guard → Interceptor(pre) → Pipe → Controller → Service → Interceptor(post) → ExceptionFilter
+```
+- **Middleware**: logging, cors, rate limiting, helmet.
+- **Guard** (`canActivate`): auth e autorização. Lança `ForbiddenException` ou `UnauthorizedException`.
+- **Interceptor**: transformar response, medir tempo, cache por rota.
+- **Pipe**: validar e transformar input. Use `ValidationPipe` globalmente com `whitelist: true, forbidNonWhitelisted: true`.
+- **Exception Filter**: padronizar responses de erro. `HttpExceptionFilter` global.
+
+**Validação com DTOs:**
+- `class-validator` + `class-transformer` nos DTOs. `@IsEmail()`, `@IsString()`, `@MinLength(8)`.
+- `@Transform(({ value }) => value?.trim())` para sanitizar strings.
+- `@Type(() => Number)` para converter query params string → number.
+- `PartialType(CreateDto)` para DTOs de update (todos os campos opcionais).
+
+**Auth JWT:**
+- `@nestjs/jwt` + `@nestjs/passport`. `PassportStrategy` com `JwtStrategy`.
+- Access token: Bearer header, curto (15min). Refresh token: httpOnly cookie, longo (7d).
+- `@UseGuards(JwtAuthGuard)` por controller ou `APP_GUARD` global.
+- `@Roles('admin')` + `RolesGuard` para RBAC.
+
+**Config:**
+- `@nestjs/config` com `ConfigModule.forRoot({ isGlobal: true, validate: (config) => plainToInstance(EnvSchema, config) })`.
+- Nunca `process.env.VAR` — sempre `this.configService.get<string>('DATABASE_URL')`.
+
+**Banco (TypeORM):**
+- `@InjectRepository(Entity)` para injeção do repository.
+- `QueryBuilder` para queries complexas com JOINs e subqueries.
+- `DataSource.transaction(async (manager) => { ... })` para operações atômicas.
+- `synchronize: false` em produção — sempre migrations explícitas.
+
+---
+
+### FastAPI — Async e Estrutura
+
+**Estrutura de Projeto:**
+```
+app/
+  core/         # config.py, security.py, dependencies.py
+  db/           # session.py (AsyncSession), base.py (Base declarativa)
+  models/       # SQLAlchemy models (tabelas)
+  schemas/      # Pydantic schemas (request/response)
+  crud/         # funções de DB por entidade
+  routers/      # APIRouter por domínio
+  main.py       # lifespan + FastAPI() factory
+```
+
+**Lifespan (padrão moderno — FastAPI 0.95+):**
+```python
+from contextlib import asynccontextmanager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await connect_db()       # startup
+    yield
+    await disconnect_db()    # shutdown
+app = FastAPI(lifespan=lifespan)
+```
+Nunca `@app.on_event("startup")` — deprecated.
+
+**Async com SQLAlchemy 2.0:**
+- `AsyncSession` + `asyncpg` driver. Nunca ORM síncrono em handler `async def`.
+- `async with AsyncSession(engine) as session: async with session.begin(): ...`
+- `await session.execute(select(User).where(User.id == id))` com `.scalar_one_or_none()`.
+- `AsyncEngine` via `create_async_engine("postgresql+asyncpg://...")`.
+
+**Pydantic v2:**
+- `model_config = ConfigDict(from_attributes=True)` substitui `orm_mode = True`.
+- `@field_validator('email', mode='before')` para sanitização antes da validação.
+- `@model_validator(mode='after')` para validações cross-field após parsing.
+- `model.model_dump(exclude_unset=True)` para PATCH (envia só campos alterados).
+- `model.model_dump(mode='json')` para serialização JSON-safe.
+
+**Dependency Injection:**
+- `Depends(get_db)` → session de banco injetada e fechada automaticamente.
+- `Depends(get_current_user)` → verifica JWT, retorna User ou lança 401.
+- `Annotated[AsyncSession, Depends(get_db)]` → estilo moderno (FastAPI 0.95+).
+- Composição: `admin_user: Annotated[User, Depends(require_admin)]`.
+
+**Background Tasks vs Celery:**
+- `BackgroundTasks.add_task(send_email, to=email)` → tarefas leves pós-response (no mesmo processo).
+- **Celery + Redis/RabbitMQ** → tarefas pesadas, retry, scheduled, alta confiabilidade.
+
+**Alembic:**
+- `alembic revision --autogenerate -m "add users table"` → gera migration.
+- Sempre revisar o SQL gerado antes de `alembic upgrade head`.
+- `alembic downgrade -1` para reverter última migration.
+- Async migrations: `run_async_migrations()` com `AsyncEngine`.
+
+---
+
+### Django + DRF — Otimização e Padrões
+
+**ORM — Regras de Performance (crítico):**
+- `select_related('author', 'category')` → JOIN SQL para FK/OneToOne. Uma query.
+- `prefetch_related('tags', 'comments')` → query separada para ManyToMany/reverse FK. Duas queries.
+- `only('id', 'title', 'slug')` → traz só os campos necessários. Evita select *.
+- `values('id', 'name')` → retorna dicts. `values_list('id', flat=True)` → lista de IDs.
+- `bulk_create(objs, batch_size=500)` → insere N registros em poucos INSERTs.
+- `bulk_update(objs, ['status', 'updated_at'])` → atualiza em batch.
+- `annotate(comment_count=Count('comments'))` → agrega sem N queries extras.
+- `F('views') + 1` → operação atômica no banco, evita race condition.
+- `transaction.atomic()` → garante que múltiplas operações são atomicamente commitadas ou revertidas.
+- Nunca `for obj in queryset: obj.field` sem `only()` ou `values()` — causa N+1.
+
+**DRF — Padrões:**
+- `ModelViewSet` + `DefaultRouter` para CRUD completo (5 linhas, 5 endpoints automáticos).
+- `permission_classes = [IsAuthenticated, IsOwner]` por view.
+- `filterset_class` com `django-filter` para filtros URL declarativos (`?status=active&author=1`).
+- `pagination_class = PageNumberPagination` no `DEFAULT_PAGINATION_CLASS` dos settings.
+- `SerializerMethodField` para campos calculados sem lógica no model.
+- `read_only_fields = ['created_at', 'created_by']` nos serializers.
+- Nested serializers: use `depth=1` para leitura simples; serializer explícito para escrever.
+- `to_representation()` override para customizar output sem perder validação de input.
+
+**Settings Split (obrigatório):**
+```
+config/settings/
+  base.py          # DEBUG=False, apps, middleware, DRF config, tempo e locale
+  development.py   # DEBUG=True, SQLite, email console, CORS permissivo
+  production.py    # PostgreSQL, email SMTP, ALLOWED_HOSTS, SECURE_SSL_REDIRECT
+  __init__.py      # from .development import *  ← ativo por padrão
+```
+
+**Django Signals (para side effects desacoplados):**
+```python
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+```
+Signals são síncronos — use Celery para side effects pesados.
+
+**Cache com Redis:**
+- `@cache_page(60 * 15)` para views HTML completas.
+- `cache.set('user:1:profile', data, timeout=3600)` para fragmentos.
+- `django-redis` + `CACHES = {'default': {'BACKEND': 'django_redis.cache.RedisCache', 'LOCATION': 'redis://...'}}`.
+
+---
+
+### Go — Idiomas e Padrões
+
+**Error Handling (crítico):**
+- `fmt.Errorf("operation failed: %w", err)` → wrapping com contexto.
+- `errors.Is(err, ErrNotFound)` → comparação por valor (funciona através de wraps).
+- `errors.As(err, &target)` → extrai tipo de erro customizado de dentro do wrap.
+- `var ErrNotFound = errors.New("not found")` → sentinela de erro por package.
+- Nunca `panic` para erros esperados. `panic` apenas para invariantes do programa (bugs).
+
+**Logging (slog — Go 1.21+):**
+- `slog.Info("user created", "id", userID, "email", email)` → structured logging.
+- `slog.Error("db query failed", "err", err, "query", q)` → nunca `fmt.Println` em produção.
+- `slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))` na `main()`.
+
+**Context (propagação obrigatória):**
+- Primeiro parâmetro de toda função I/O: `ctx context.Context`.
+- `ctx.Done()` → canal fechado ao cancelar. Verifique antes de operações longas.
+- `context.WithTimeout(ctx, 5*time.Second)` para HTTP calls externas e queries.
+- Nunca guarde context em struct — passe como parâmetro sempre.
+
+**Concorrência:**
+```go
+// Fan-out com error handling
+g, ctx := errgroup.WithContext(ctx)
+g.Go(func() error { return doA(ctx) })
+g.Go(func() error { return doB(ctx) })
+if err := g.Wait(); err != nil { ... }
+```
+- `sync.WaitGroup` para fan-out sem return de erro.
+- `sync.Mutex` para proteger estado compartilhado. `sync.RWMutex` quando leituras dominam.
+- Channels para comunicação entre goroutines. Mutex para proteção de dados.
+
+**Estrutura de Pacotes (Clean Architecture em Go):**
+```
+cmd/api/main.go       # entry point: cria dependências, injeta, inicia server
+internal/
+  domain/             # entidades + interfaces (zero deps externas)
+  service/            # lógica de negócio (depende de domain)
+  repository/         # implementações de DB (depende de domain)
+  handler/            # HTTP handlers (depende de service)
+pkg/                  # utilitários exportáveis (logger, validator, etc.)
+```
+
+**Functional Options Pattern:**
+```go
+type Server struct{ port int; timeout time.Duration }
+type Option func(*Server)
+func WithPort(p int) Option        { return func(s *Server) { s.port = p } }
+func WithTimeout(t time.Duration) Option { return func(s *Server) { s.timeout = t } }
+func NewServer(opts ...Option) *Server { s := &Server{port: 8080, timeout: 30*time.Second}; for _, o := range opts { o(s) }; return s }
+```
+
+**Testes:**
+- Table-driven: `tests := []struct{ name, input string; want int }{}; for _, tt := range tests { t.Run(tt.name, func(t *testing.T) {...}) }`.
+- `httptest.NewRecorder()` + `httptest.NewRequest()` para handlers HTTP.
+- Interfaces para mocking (sem frameworks): `type UserRepo interface { FindByID(ctx, id) (*User, error) }`.
+- `testify/assert` para assertions legíveis.
+
+---
+
+### React Native / Flutter — Mobile
+
+**React Native:**
+- `@react-navigation/native` com `Stack.Navigator` + `Tab.Navigator` para estrutura de navegação.
+- `FlatList` com `keyExtractor` e `getItemLayout` para listas performáticas. Nunca `ScrollView` para listas longas.
+- `MMKV` (`react-native-mmkv`) para armazenamento local rápido (10x mais rápido que AsyncStorage).
+- Zustand + `persist` middleware para estado global persistente.
+- `Platform.select({ ios: {}, android: {} })` para diferenças de plataforma.
+- Imagens: `@shopify/flash-list` é mais performático que FlatList para listas grandes.
+
+**Flutter:**
+- `Riverpod` para state management (type-safe, testável, sem BuildContext nos providers).
+- `GoRouter` para navegação declarativa com deep linking.
+- `const` em widgets sempre que possível — evita rebuilds desnecessários.
+- `ListView.builder` para listas dinâmicas. `SliverList` para efeitos de scroll avançados.
+- Isolates (`compute()`) para JSON parsing pesado ou criptografia — libera main thread.
+
+---
+
+## Arquitetura — Padrões e Decisões
+
+### Monolito vs Microsserviços
+- **Regra de ouro**: comece com monolito. Microsserviços são a resposta para problemas de escala que um monolito JÁ manifestou.
+- **Microsserviços quando**: times independentes por serviço, escala diferenciada por componente, falhas precisam ser isoladas por contrato de negócio.
+- **Anti-padrão crítico**: microsserviços para projeto novo de time pequeno — distribui complexidade sem ganho.
+
+### Clean Architecture / Hexagonal
+- **Quando**: projetos complexos, múltiplas integrações externas, necessidade de trocar banco ou framework no futuro.
+- **Camadas** (dependência sempre de fora para dentro): Frameworks → Interface Adapters → Use Cases → Entities.
+- **Regra de dependência**: nada no core (Use Cases, Entities) pode importar algo externo (framework, DB driver).
+- Aplica em qualquer stack: NestJS modules, FastAPI routers, Go packages, Django apps.
+
+### CQRS (Command Query Responsibility Segregation)
+- **Quando**: leitura e escrita têm modelos muito diferentes; carga de leitura muito maior; auditoria detalhada é requisito.
+- **Commands**: mudam estado (retornam void ou ID criado). **Queries**: leem estado (retornam DTO, nunca entidade de domínio).
+- Em NestJS: `@nestjs/cqrs` com `CommandBus.execute(new CreateOrderCommand(...))`.
+- Não precisa de Event Sourcing para ser útil — pode ser CQRS simples.
+
+### Repository Pattern
+- **Use sempre** que a lógica de negócio não deve conhecer SQL ou o ORM.
+- Interface no domínio, implementação na camada de infra. Facilita mocks em testes.
+- Django: custom `Manager` é o repository. Go: interface com métodos + struct. NestJS: classe com `@InjectRepository`.
+
+### BFF (Backend for Frontend)
+- **Quando**: app mobile e web consomem a mesma API mas com payloads muito diferentes.
+- Um BFF por cliente. Agrega chamadas de APIs internas, adapta payload. Não contém lógica de negócio.
+
+### Event-Driven (assíncrono)
+- **Quando**: processos que não precisam de resposta imediata: email, notificação, relatório, cache warm-up.
+- Nunca para operações que precisam de response síncrona (ex: auth, checkout em tempo real).
+- **Ferramentas**: Redis Pub/Sub (simples, baixo volume), RabbitMQ (garantia de entrega, DLQ), Kafka (stream de alta vazão).
+
+### Database Design — Decisões Críticas
+
+**UUID vs BIGINT:**
+- UUID: seguro para APIs públicas (não vaza volume), bom para IDs de entidades de negócio.
+- BIGINT auto-increment: menor, mais rápido em JOINs, melhor para tabelas de log/evento com bilhões de registros.
+- **Recomendação**: UUID para entidades expostas na API; BIGINT para tabelas internas de alto volume.
+
+**Soft Delete:**
+- Adicione `deleted_at TIMESTAMP NULL` quando: auditoria é requisito, LGPD exige histórico, relações dependem do registro.
+- Crie índice parcial `WHERE deleted_at IS NULL` para não degradar performance de queries normais.
+
+**Indexes (regras):**
+- Automático: PKs e FKs.
+- Manual obrigatório: colunas em `WHERE`, `ORDER BY`, `JOIN` com alta cardinalidade.
+- Composto: quando queries filtram por dois campos juntos — ex: `(user_id, created_at)` para "posts do usuário por data".
+- Nunca em colunas de baixa cardinalidade (boolean, status com 2-3 valores).
+
+**Audit Trail:**
+- Tabela `_audit_log`: `entity`, `entity_id`, `action (CREATE/UPDATE/DELETE)`, `actor_id`, `timestamp`, `old_values JSONB`, `new_values JSONB`.
+- Django: `django-simple-history`. Prisma: middleware. Go: interceptor de repository.
+
+### Performance — Padrões Transversais
+
+**N+1 Query (anti-padrão universal):**
+- Sintoma: `for item in list: item.related_object` dentro de loop.
+- Django: `select_related` / `prefetch_related`. Prisma: `include`. SQLAlchemy: `joinedload` / `selectinload`. Go: batch query com `IN (ids)`.
+
+**Caching Strategy:**
+- Cache primeiro para: sessões de usuário, dados de configuração, resultados de queries caras.
+- Padrão Cache-Aside: tenta cache → miss → busca DB → popula cache → retorna.
+- TTL baseado em frequência de mudança: configurações (1h), perfis (5min), feed (30s).
+- Invalidação por tag quando múltiplas chaves dependem de uma entidade.
+
+**Paginação:**
+- Cursor-based (`WHERE id > $last_id LIMIT N`) → escala melhor que offset para tabelas grandes.
+- Offset (`LIMIT N OFFSET M`) → ok para páginas pequenas e tabelas < 1M registros.
+
+---
+
 ## Padrões Aprendidos
 
 ### Multi-Tenant SaaS (Subdomain Routing)
@@ -103,6 +483,38 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 ---
 
 ## Anti-Padrões Conhecidos
+
+### Stack/Next.js: Usar patterns do Pages Router no App Router
+- **Problema**: `getServerSideProps`, `getStaticProps`, `<Head>` do `next/head`, `useRouter` do `next/router` — tudo do pages router. No App Router não funcionam ou são deprecated.
+- **Regra**: App Router usa Server Components + `fetch()` para data fetching, `export async function generateMetadata()` para SEO, `useRouter` do `next/navigation`, `loading.tsx`/`error.tsx` para estados automáticos.
+
+### Stack/Next.js: 'use client' no layout.tsx
+- **Problema**: Colocar `'use client'` no `layout.tsx` quebra Server-Side Rendering de toda a árvore abaixo. Nenhum componente filho pode ser Server Component.
+- **Regra**: Layout é Server Component por padrão. Para estado global no layout, use Context wrapped em Client Component importado como filho.
+
+### Stack/React: useEffect para buscar dados do servidor
+- **Problema**: `useEffect(() => { fetch('/api/data').then(setData) }, [])` — causa loading flicker, sem cache, sem refetch automático, sem error handling robusto.
+- **Regra**: Use TanStack Query (`useQuery`) para client-side fetching. Use Server Components para server-side fetching. Nunca useEffect + fetch para dados do servidor.
+
+### Stack/NestJS: synchronize: true em produção
+- **Problema**: `synchronize: true` no TypeORM faz o banco sincronizar automaticamente com as entidades — pode DROPAR colunas/tabelas em produção.
+- **Regra**: `synchronize: false` sempre em produção. Migrations explícitas via `typeorm migration:generate` + `migration:run`.
+
+### Stack/FastAPI: handler async com ORM síncrono
+- **Problema**: `async def get_users(db: Session = Depends(get_db)):` — usando Session síncrona do SQLAlchemy dentro de handler async bloqueia o event loop.
+- **Regra**: Handlers async usam `AsyncSession` + `asyncpg`. Ou usar handlers síncronos (`def`, não `async def`) com Session síncrona.
+
+### Stack/Django: N+1 em querysets
+- **Problema**: `for post in Post.objects.all(): print(post.author.name)` — dispara uma query por post para buscar o autor.
+- **Regra**: `Post.objects.select_related('author').all()` — uma query com JOIN. Audite N+1 com `django-debug-toolbar` ou `connection.queries`.
+
+### Stack/Go: não propagar context
+- **Problema**: `func GetUser(id int) (*User, error) { db.Query("SELECT...") }` — sem ctx, não é possível cancelar a operação ou propagar timeouts.
+- **Regra**: `func GetUser(ctx context.Context, id int) (*User, error) { db.QueryContext(ctx, "SELECT...") }` — ctx sempre como primeiro parâmetro.
+
+### Arquitetura: microsserviços prematuro
+- **Problema**: criar 5 microsserviços para um MVP que poderia ser um monolito. Distribuição traz complexidade de rede, observabilidade, deploy, e consistência eventual antes de existir problema real de escala.
+- **Regra**: comece com monolito modular. Extraia serviços quando houver problema real de escala ou times independentes por domínio.
 
 ### Código/Django: Criar modelos sem verificar existentes
 - **Problema**: Conflito de `related_name` causa `SystemCheckError` em runtime

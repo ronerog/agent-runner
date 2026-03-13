@@ -104,6 +104,49 @@ Antes do `status: completed` da última tarefa, execute a Validação Final Inte
 
 Se algum item falhar: crie tarefas de correção e execute antes de concluir o projeto.
 
+## Padrões de Teste por Stack
+
+### Next.js / React
+- **Playwright** para E2E: testa fluxos reais no browser (login, checkout, CRUD completo).
+- **React Testing Library** para componentes: testa comportamento, não implementação. Use `getByRole`, nunca `getByTestId` sem necessidade.
+- **Vitest** para lógica pura: utils, hooks, formatadores.
+- Testes de acessibilidade: `axe-playwright` ou `@axe-core/react` nos componentes principais.
+- Cubra: fluxo de auth (login, logout, redirect protegido), CRUD principal, estados de erro e loading.
+
+### NestJS
+- **Jest** com `@nestjs/testing`. `Test.createTestingModule()` para módulos isolados.
+- **Supertest** para testes de integração HTTP (testa o pipeline completo: guard, pipe, controller).
+- Mock de serviços com `jest.fn()` + `{ provide: ServiceClass, useValue: mockObj }`.
+- Testes de guards: `canActivate` com mocks de `ExecutionContext`.
+- Cobertura mínima: todos os endpoints com casos de sucesso + falha de validação + não autorizado.
+
+### FastAPI
+- **pytest** + **httpx.AsyncClient** para testes assíncronos de endpoints.
+- `pytest-asyncio` com `asyncio_mode = "auto"` no `pyproject.toml`.
+- Fixture de banco de teste com rollback entre testes (não polui dados).
+- `override_dependency` para mockar `get_current_user` em testes sem JWT real.
+- Cubra: todos os endpoints, validação de schema, casos de erro 404/422/403.
+
+### Django + DRF
+- **pytest-django** com `@pytest.mark.django_db`.
+- `APIClient` do DRF para testes de views.
+- Factories com `factory_boy` para criar dados de teste sem fixtures frágeis.
+- `RequestFactory` para testes unitários de views sem banco.
+- Cubra: serializer validation, permission classes, queryset filtering.
+
+### Go
+- Table-driven tests para funções puras: `[]struct{ name, input, want }`.
+- `httptest.NewRecorder()` + `httptest.NewRequest()` para handlers HTTP.
+- Interfaces para mocking (sem frameworks pesados). Defina interface → mock na struct de teste.
+- `t.Run(tt.name, func(t *testing.T) { t.Parallel() })` para paralelizar testes independentes.
+- `go test -race ./...` para detectar race conditions.
+
+### Princípios Gerais de Teste
+- **Pirâmide**: muitos testes unitários, alguns de integração, poucos E2E.
+- **Arrange-Act-Assert**: estruture cada teste claramente nas 3 fases.
+- **Teste comportamento, não implementação**: se refatorar sem mudar comportamento, testes devem passar.
+- **Dados isolados**: cada teste cria seus próprios dados. Nunca dependa de ordem de execução.
+
 ## Regra de Ouro
 
 **NUNCA marque tarefa como `completed` se `meta.check_cmd` falhar.**

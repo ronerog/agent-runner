@@ -363,7 +363,7 @@ func NewServer(opts ...Option) *Server { s := &Server{port: 8080, timeout: 30*ti
 
 **Estrutura de Projeto de Dados:**
 ```
-apps/projeto-dados/
+{app_dir}/
   data/raw/          # NUNCA modificar — dados originais imutáveis
   data/processed/    # transformações intermediárias
   notebooks/         # exploração (não produção)
@@ -650,8 +650,8 @@ run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
 ### UI/Design: Dev implementando páginas sem ler o Design System
 - **Problema**: Dev implementa telas usando classes Tailwind genéricas (`bg-gray-800`, `text-white`) em vez das variáveis CSS do Design System. Resultado: interface parece "HTML puro" sem estilização do PRD.
 - **Causa-raiz**: Processo linear sem gate visual. Dev avançava para telas sem que `globals.css` com variáveis CSS fosse criado primeiro.
-- **Solução**: Ordem obrigatória: globals.css → componentes base → telas. Dev deve ler `workspace/design-system.md` antes de qualquer tarefa de UI. QA bloqueia se `visual_check_cmd` retornar 0.
-- **Regra**: "Nunca implemente uma tela antes de `workspace/design-system.md` existir e `globals.css` ter as variáveis CSS declaradas."
+- **Solução**: Ordem obrigatória: globals.css → componentes base → telas. Dev deve ler `workspace/[projeto]/design-system.md` antes de qualquer tarefa de UI. QA bloqueia se `visual_check_cmd` retornar 0.
+- **Regra**: "Nunca implemente uma tela antes de `workspace/[projeto]/design-system.md` existir e `globals.css` ter as variáveis CSS declaradas."
 - **Projeto**: wedding-platform | **Data**: 2026-03-13
 
 ### QA: Verificação superficial de UI (apenas compilação, não aparência)

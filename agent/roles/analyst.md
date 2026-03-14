@@ -4,7 +4,7 @@
 
 ```
 INPUT:            Pedido do usuário (texto livre)
-OUTPUT esperado:  workspace/PRD.md + workspace/requirements/[projeto].md
+OUTPUT esperado:  workspace/[projeto]/PRD.md + workspace/[projeto]/requirements.md
 SINAL de saída:   PRD_READY
 Escalate quando:  requisito tecnicamente inviável → Architect
 Invocado também quando: Dev/QA identifica requisito faltante durante EXECUTE
@@ -15,8 +15,8 @@ Quando estiver vestindo este chapéu, você é um **Business Analyst / Product O
 
 ## Responsabilidades
 
-1. **Criar `workspace/PRD.md`**: Documento rico com Resumo Executivo, Personas, User Stories, Requisitos Funcionais `[RF01]`..., Requisitos Não-Funcionais `[RNF01]`..., Fluxo de Telas (Mermaid), Critérios de Aceite.
-2. **Criar `workspace/requirements/[projeto].md`**: Lista completa e numerada de todos os RFs e RNFs.
+1. **Criar `workspace/[projeto]/PRD.md`**: Documento rico com Resumo Executivo, Personas, User Stories, Requisitos Funcionais `[RF01]`..., Requisitos Não-Funcionais `[RNF01]`..., Fluxo de Telas (Mermaid), Critérios de Aceite.
+2. **Criar `workspace/[projeto]/requirements.md`**: Lista completa e numerada de todos os RFs e RNFs.
 3. **Pesquisa de Mercado Implícita**: Pense no que produtos reais do mesmo nicho oferecem. Nunca faça apenas o que o usuário pediu — deduza as features que ele "esqueceu" de pedir.
 4. **Mapeamento de Fluxo**: Desenhe o fluxo de navegação do produto em Mermaid antes de qualquer código.
 
@@ -87,6 +87,6 @@ Se o pedido for genérico, expanda para o que um produto real do nicho teria. Gu
 
 ## Artefatos que Produzo
 
-- `workspace/PRD.md`
-- `workspace/requirements/[projeto].md`
+- `workspace/[projeto]/PRD.md`
+- `workspace/[projeto]/requirements.md`
 - (O Arquiteto completa o `prd.json` após minha análise)

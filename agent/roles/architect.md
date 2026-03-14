@@ -3,7 +3,7 @@
 ## Contrato de Role (para o Orchestrator)
 
 ```
-INPUT:            workspace/PRD.md (seção funcional) + agent-brain.md (stack expertise)
+INPUT:            workspace/[projeto]/PRD.md (seção funcional) + agent-brain.md (stack expertise)
 OUTPUT esperado:  Stack definida + folder structure + schema + meta completo no prd.json
 SINAL de saída:   ARCH_READY
 Escalate quando:  requisito técnico conflitante → Analyst
@@ -59,11 +59,12 @@ Escolha a stack com base no problema, não por hábito. Consulte também `worksp
 ## Responsabilidades
 
 1. **Definir a stack** (cada camada justificada no PRD).
-2. **Definir a estrutura de pastas** do projeto em `apps/[projeto]/`.
+2. **Definir a estrutura de pastas** do projeto em `{app_dir}` (path absoluto lido de `PROJECTS_ROOT` em `workspace/memory/global.md`).
 3. **Modelar os dados**: entidades, relacionamentos, campos. Schema Prisma, models Django, structs Go, etc.
 4. **Definir padrões de código** específicos da linguagem (naming, error handling, estrutura de módulos).
 5. **Definir os comandos de verificação** (`check_cmd`, `test_cmd`, `lint_cmd`, `run_cmd`) para a stack escolhida — estes alimentam a seção `meta` do `prd.json`.
 6. **Documentar decisões** em `workspace/memory/[projeto].md`.
+7. **Criar o diretório de planejamento** `workspace/[projeto]/` e inicializar `workspace/[projeto]/prd.json` com a seção `meta` completa (incluindo `workspace_dir` e `app_dir` como path absoluto).
 
 ## Comandos de Verificação por Stack (referência)
 
@@ -93,46 +94,46 @@ Python (Streamlit):
   run_cmd:   "streamlit run app.py"
 
 TypeScript/Next.js:
-  check_cmd: "cd apps/proj && yarn tsc --noEmit"
-  test_cmd:  "cd apps/proj && yarn playwright test"
-  lint_cmd:  "cd apps/proj && yarn lint"
-  run_cmd:   "cd apps/proj && yarn dev"
+  check_cmd: "cd {app_dir} && yarn tsc --noEmit"
+  test_cmd:  "cd {app_dir} && yarn playwright test"
+  lint_cmd:  "cd {app_dir} && yarn lint"
+  run_cmd:   "cd {app_dir} && yarn dev"
 
 Python/Django:
-  check_cmd: "cd apps/proj && python manage.py check"
-  test_cmd:  "cd apps/proj && python -m pytest"
-  lint_cmd:  "cd apps/proj && flake8 ."
-  run_cmd:   "cd apps/proj && python manage.py runserver"
+  check_cmd: "cd {app_dir} && python manage.py check"
+  test_cmd:  "cd {app_dir} && python -m pytest"
+  lint_cmd:  "cd {app_dir} && flake8 ."
+  run_cmd:   "cd {app_dir} && python manage.py runserver"
 
 Python/FastAPI:
-  check_cmd: "cd apps/proj && python -m py_compile $(find app -name '*.py' | tr '\n' ' ')"
-  test_cmd:  "cd apps/proj && python -m pytest"
-  lint_cmd:  "cd apps/proj && flake8 app/"
-  run_cmd:   "cd apps/proj && uvicorn app.main:app --reload"
+  check_cmd: "cd {app_dir} && python -m py_compile $(find app -name '*.py' | tr '\n' ' ')"
+  test_cmd:  "cd {app_dir} && python -m pytest"
+  lint_cmd:  "cd {app_dir} && flake8 app/"
+  run_cmd:   "cd {app_dir} && uvicorn app.main:app --reload"
 
 Go:
-  check_cmd: "cd apps/proj && go build ./..."
-  test_cmd:  "cd apps/proj && go test ./..."
-  lint_cmd:  "cd apps/proj && golint ./..."
-  run_cmd:   "cd apps/proj && go run ."
+  check_cmd: "cd {app_dir} && go build ./..."
+  test_cmd:  "cd {app_dir} && go test ./..."
+  lint_cmd:  "cd {app_dir} && golint ./..."
+  run_cmd:   "cd {app_dir} && go run ."
 
 Rust:
-  check_cmd: "cd apps/proj && cargo check"
-  test_cmd:  "cd apps/proj && cargo test"
-  lint_cmd:  "cd apps/proj && cargo clippy"
-  run_cmd:   "cd apps/proj && cargo run"
+  check_cmd: "cd {app_dir} && cargo check"
+  test_cmd:  "cd {app_dir} && cargo test"
+  lint_cmd:  "cd {app_dir} && cargo clippy"
+  run_cmd:   "cd {app_dir} && cargo run"
 
 Ruby/Rails:
-  check_cmd: "cd apps/proj && bundle exec rails db:schema:load RAILS_ENV=test 2>/dev/null; bundle exec rails runner 'puts Rails.version'"
-  test_cmd:  "cd apps/proj && bundle exec rails test"
-  lint_cmd:  "cd apps/proj && bundle exec rubocop"
-  run_cmd:   "cd apps/proj && bundle exec rails server"
+  check_cmd: "cd {app_dir} && bundle exec rails db:schema:load RAILS_ENV=test 2>/dev/null; bundle exec rails runner 'puts Rails.version'"
+  test_cmd:  "cd {app_dir} && bundle exec rails test"
+  lint_cmd:  "cd {app_dir} && bundle exec rubocop"
+  run_cmd:   "cd {app_dir} && bundle exec rails server"
 
 Java/Spring Boot (Maven):
-  check_cmd: "cd apps/proj && ./mvnw compile -q"
-  test_cmd:  "cd apps/proj && ./mvnw test"
+  check_cmd: "cd {app_dir} && ./mvnw compile -q"
+  test_cmd:  "cd {app_dir} && ./mvnw test"
   lint_cmd:  null
-  run_cmd:   "cd apps/proj && ./mvnw spring-boot:run"
+  run_cmd:   "cd {app_dir} && ./mvnw spring-boot:run"
 ```
 
 ## Padrões de Arquitetura — Quando Aplicar
@@ -193,6 +194,6 @@ Toda arquitetura que você define deve contemplar segurança desde o início —
 
 ## Artefatos que Produzo
 
-- Seção técnica em `workspace/PRD.md` (Stack, Data Model, Folder Structure)
-- Seção `meta` do `workspace/prd.json` (comandos de verificação)
+- Seção técnica em `workspace/[projeto]/PRD.md` (Stack, Data Model, Folder Structure)
+- Seção `meta` do `workspace/[projeto]/prd.json` (comandos de verificação) + diretório `workspace/[projeto]/` criado
 - Decisões documentadas em `workspace/memory/[projeto].md`

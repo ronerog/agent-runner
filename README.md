@@ -24,7 +24,7 @@ A central `orchestrator.md` owns the state machine, routes tasks by type, inject
 | Analyst | Transforms ideas into PRDs, deduces implicit features | `PRD_READY` |
 | Architect | Chooses the right stack, models data, defines structure | `ARCH_READY` |
 | **Data Scientist** | Statistical methodology, EDA, model validation, reproducibility gate | `DS_READY` / `DS_PASS` |
-| Designer | Design System, palette, layouts — produces `workspace/design-system.md` | `DESIGN_READY` |
+| Designer | Design System, palette, layouts — produces `workspace/[projeto]/design-system.md` | `DESIGN_READY` |
 | Developer | Implements with full autonomy, reads Design System before every UI task | `IMPL_READY` |
 | QA | Technical gate after each task — never advances with failures | `QA_PASS / QA_FAIL` |
 | Visual Validator | Visual compliance check — ensures UI matches Design System and PRD | `VV_PASS / VV_FAIL` |
@@ -147,7 +147,7 @@ Open the repository in your IDE and use the command:
 
 To add features to an existing project:
 ```
-/inject apps/my-project — add user authentication with JWT and a profile settings page
+/inject ~/projects/my-project — add user authentication with JWT and a profile settings page
 ```
 
 To resume a previous session:
@@ -221,16 +221,18 @@ agent-runner/
 │   └── scripts/               # start.sh, start-r.sh, agent_run.sh, git_commit.sh, run_checks.sh
 │                              # rstudio-setup.md — RStudio integration guide
 │
-├── apps/                      # Generated projects (monorepo)
-│
 └── workspace/
     ├── memory/
     │   ├── agent-brain.md     # Agent's cross-project memory (grows with use)
     │   ├── global.md          # Global environment rules
     │   └── snapshots/         # Previous session state
-    ├── requirements/          # Detailed requirements per project
-    ├── design-system.md       # Visual contract: CSS vars, palette, components (UI projects)
-    └── PRD.md                 # Current project PRD
+    └── [projeto]/             # Per-project planning artifacts
+        ├── PRD.md             # Project PRD
+        ├── prd.json           # Atomic tasks with instructions
+        ├── requirements.md    # Detailed RFs and RNFs
+        └── design-system.md   # Visual contract: CSS vars, palette, components (UI projects)
+
+~/projects/[projeto]/          # Generated projects (external, outside motor)
 ```
 
 ---

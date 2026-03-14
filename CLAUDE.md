@@ -35,19 +35,19 @@ Leia `agent/prompts/plan.md` e execute como time completo:
 **Analista** → **Arquiteto** → **Designer** → **Task Breakdown**
 
 Produza obrigatoriamente:
-- `workspace/PRD.md` — requisitos, personas, user stories, fluxo de telas
-- `workspace/requirements/[projeto].md` — lista detalhada de RFs e RNFs
-- `workspace/prd.json` — tarefas atômicas com `instructions` auto-suficientes
-- `workspace/design-system.md` — se `has_ui: true`: contrato visual completo (CSS vars, paleta, fontes, componentes)
+- `workspace/[projeto]/PRD.md` — requisitos, personas, user stories, fluxo de telas
+- `workspace/[projeto]/requirements.md` — lista detalhada de RFs e RNFs
+- `workspace/[projeto]/prd.json` — tarefas atômicas com `instructions` auto-suficientes
+- `workspace/[projeto]/design-system.md` — se `has_ui: true`: contrato visual completo (CSS vars, paleta, fontes, componentes)
 
 O `prd.json` tem seção `meta` com os comandos da stack e cada tarefa tem um campo `type`:
 ```json
 {
   "meta": {
-    "project": "...", "stack": "...", "app_dir": "apps/...",
+    "project": "...", "stack": "...", "workspace_dir": "workspace/[nome-do-projeto]", "app_dir": "~/projects/[nome-do-projeto]",
     "check_cmd": "...", "test_cmd": "...", "lint_cmd": "...", "run_cmd": "...",
     "has_ui": true,
-    "visual_check_cmd": "grep -c 'var(--color-primary)' apps/.../app/globals.css"
+    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/[nome-do-projeto]/app/globals.css"
   },
   "tasks": [
     { "id": 1, "type": "setup", "task": "...", "file": "...", "instructions": "...", "done_when": "...", "rf": ["RF01"], "status": "pending" }
@@ -55,8 +55,12 @@ O `prd.json` tem seção `meta` com os comandos da stack e cada tarefa tem um ca
 }
 ```
 
-**Tipos de tarefa** (`type`): `setup` | `config` | `schema` | `backend` | `ui-setup` | `ui-component` | `ui-screen` | `integration` | `test` | `docs`
-O tipo determina o pipeline de roles (ver `agent/prompts/orchestrator.md`).
+**Tipos válidos de tarefa** (`type`):
+- Web: `setup` | `config` | `schema` | `backend` | `ui-setup` | `ui-component` | `ui-screen` | `integration` | `test` | `docs`
+- Dados/R: `notebook` | `pipeline` | `viz` | `model` | `report` | `r-script` | `r-shiny`
+
+O `type` determina qual pipeline de roles é executado. Detalhes: `agent/prompts/orchestrator.md`.
+Se o projeto envolve dados/stats/ML: invoque também `agent/roles/data-scientist.md` durante o PLAN.
 
 **Regras do PLAN:**
 - Nunca replaneie depois. O `prd.json` é lei (só adicione tarefas, nunca delete)

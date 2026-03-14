@@ -1,26 +1,38 @@
 # Fase EXECUTE + VERIFY — Loop por Tarefa
 
-Execute este loop para **cada tarefa** do `workspace/prd.json`, uma de cada vez, em ordem crescente de ID.
+Execute este loop para **cada tarefa** do `workspace/[projeto]/prd.json`, uma de cada vez, em ordem crescente de ID.
 
 > Referência de roteamento e escalação: `agent/prompts/orchestrator.md`
 
 ---
 
+## Passo 0 — Releitura de Contexto (SEMPRE ao entrar nesta fase)
+
+Antes de executar qualquer tarefa, garanta que você leu:
+1. `workspace/memory/agent-brain.md` — anti-padrões e padrões acumulados
+2. `workspace/memory/snapshots/latest.md` — se existir, estado da sessão anterior
+3. `workspace/memory/global.md` — configuração do ambiente (`PROJECTS_ROOT`)
+
+> Modelos fracos: não pule este passo. Sem `agent-brain.md`, você repetirá erros já documentados.
+
+---
+
 ## Antes de Começar: Ler Metadados
 
-Leia a seção `meta` do `workspace/prd.json`:
+Leia a seção `meta` do `workspace/[projeto]/prd.json` (path em `meta.workspace_dir`, ou escaneie `workspace/` por subdiretórios com `prd.json`):
 
 ```json
 "meta": {
   "project": "nome",
   "stack": "Python/Django",
-  "app_dir": "apps/nome",
-  "check_cmd": "cd apps/nome && python manage.py check",
-  "test_cmd":  "cd apps/nome && python -m pytest",
-  "lint_cmd":  "cd apps/nome && flake8 .",
-  "run_cmd":   "cd apps/nome && python manage.py runserver",
+  "workspace_dir": "workspace/nome",
+  "app_dir": "~/projects/nome",
+  "check_cmd": "cd ~/projects/nome && python manage.py check",
+  "test_cmd":  "cd ~/projects/nome && python -m pytest",
+  "lint_cmd":  "cd ~/projects/nome && flake8 .",
+  "run_cmd":   "cd ~/projects/nome && python manage.py runserver",
   "has_ui": true,
-  "visual_check_cmd": "grep -c 'var(--color-primary)' apps/nome/app/globals.css"
+  "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/nome/app/globals.css"
 }
 ```
 
@@ -54,6 +66,13 @@ Antes de executar cada tarefa, leia `task.type` e selecione o pipeline:
 
 > **Se `task.type` estiver ausente**: trate como `backend` (pipeline completo menos visual).
 
+> **Nota para tarefa `setup` (sempre a primeira):** antes de qualquer instalação de dependência, execute:
+> ```bash
+> mkdir -p {app_dir}
+> cd {app_dir} && git init
+> ```
+> Use o valor de `meta.app_dir` do `prd.json`. Isso garante que o projeto já nasce como repositório Git isolado fora do agent-runner.
+
 > **Para tipos `notebook`, `viz`, `model`, `report`, `r-script`**: Após `IMPL_READY`, execute o **Gate Estatístico** antes do Gate Técnico do QA:
 > 1. Data Scientist executa Protocolo de Validação Estatística (`agent/roles/data-scientist.md` seção "Fase VERIFY")
 > 2. Sinal `DS_PASS` → QA executa `check_cmd` normalmente
@@ -69,7 +88,7 @@ Antes de executar cada tarefa, leia `task.type` e selecione o pipeline:
 SINAL DE ENTRADA → ORCHESTRATOR
 ```
 
-- Leia `workspace/prd.json`. Pegue a **primeira tarefa** com `status: "pending"`.
+- Leia `workspace/[projeto]/prd.json`. Pegue a **primeira tarefa** com `status: "pending"`.
 - Se **não houver tarefas pendentes** → vá para a **Fase de Validação Final**.
 - Leia `task.type` → selecione o pipeline da tabela acima.
 - Atualize para `status: "in_progress"` imediatamente.
@@ -82,7 +101,7 @@ SINAL DE ENTRADA → ORCHESTRATOR
 2. Campo `instructions` da tarefa atual — auto-suficiente
 
 **Adicione se o tipo exigir:**
-- Tarefa de `ui-*`: + `workspace/design-system.md`
+- Tarefa de `ui-*`: + `workspace/[projeto]/design-system.md`
 - Tarefa de `schema`: + modelos existentes (verificar conflitos)
 - Tarefa de `backend`: + `workspace/memory/[projeto].md` (decisões técnicas)
 
@@ -99,7 +118,7 @@ ROLE: Desenvolvedor | INPUT: task.instructions + contexto mínimo
 
 - Crie ou modifique o arquivo exato em `task.file`.
 - Siga `task.instructions` à risca.
-- Para tarefas `ui-*`: use **exclusivamente** variáveis CSS de `workspace/design-system.md`. Nunca valores hardcoded de cor, fonte ou espaçamento.
+- Para tarefas `ui-*`: use **exclusivamente** variáveis CSS de `workspace/[projeto]/design-system.md`. Nunca valores hardcoded de cor, fonte ou espaçamento.
 - Instale dependências:
   - Node.js: `yarn add [pacote]`
   - Python: `pip install [pacote]` + `requirements.txt`

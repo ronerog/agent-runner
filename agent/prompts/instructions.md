@@ -36,12 +36,19 @@ PLAN (1x) → [EXECUTE(task.type-routing) → VERIFY → LEARN] × N → VALIDA�
 
 ### Fase PLAN (Única)
 Execute `agent/prompts/plan.md`.
-Produz: `workspace/PRD.md` + `workspace/requirements/[projeto].md` + `workspace/prd.json` (com `type` em cada task) + `workspace/design-system.md` (se `has_ui: true`).
+Produz: `workspace/[projeto]/PRD.md` + `workspace/[projeto]/requirements.md` + `workspace/[projeto]/prd.json` (com `type` em cada task) + `workspace/[projeto]/design-system.md` (se `has_ui: true`).
 **NUNCA replaneie. O `prd.json` é imutável — só adicione, nunca delete ou altere tarefas.**
 
 ### Fase EXECUTE + VERIFY (Loop por Tarefa com Roteamento)
 Execute `agent/prompts/execute.md`. Cada tarefa é roteada pelo campo `task.type` para o pipeline correto de roles.
 Roles produzem sinais explícitos: `IMPL_READY`, `QA_PASS`, `QA_FAIL`, `VV_PASS`, `VV_FAIL`.
+
+**Roteamento rápido por `task.type`** (detalhes em `orchestrator.md`):
+- `setup`, `config`, `schema`, `docs`: Dev → (QA) → commit
+- `backend`, `integration`, `pipeline`: Dev → QA(check+lint/test) → commit
+- `ui-setup`, `ui-component`, `ui-screen`, `r-shiny`: Dev → QA → VisualValidator → commit
+- `notebook`, `viz`, `model`, `report`, `r-script`: Dev + DataScientist → QA → commit
+- `test`: QA → Dev(fix) → commit
 
 ### Fase LEARN
 Execute `agent/prompts/learn.md`. Silêncio quando nada novo — não gere output desnecessário.
@@ -67,7 +74,7 @@ Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 | Analista | `analyst.md` | Fase PLAN — criação do PRD |
 | Arquiteto | `architect.md` | Fase PLAN — estrutura técnica e stack |
 | Data Scientist | `data-scientist.md` | Fase PLAN (dados/stats/ML) + VERIFY de análises |
-| Designer | `designer.md` | Fase PLAN — Design System + `workspace/design-system.md` |
+| Designer | `designer.md` | Fase PLAN — Design System + `workspace/[projeto]/design-system.md` |
 | Desenvolvedor | `dev.md` | Fase EXECUTE — implementação |
 | QA | `qa.md` | Fase VERIFY técnico |
 | Visual Validator | `visual-validator.md` | Fase VERIFY visual (tarefas de UI) + Validação Final |
@@ -86,8 +93,8 @@ Antes de agir em cada fase, leia o papel correspondente em `agent/roles/`:
 6. **SEMPRE leia `agent-brain.md` primeiro** — evite repetir erros já aprendidos.
 7. **SEMPRE commite após cada tarefa concluída** — progresso incremental e reversível.
 8. **Se travar 3x no mesmo erro** — documente em `agent-brain.md` com causa e solução, e siga em frente.
-9. **Economia de tokens** — na Fase EXECUTE, leia apenas o campo `instructions` da tarefa + `agent-brain.md`. Exceção: tarefas de UI leem também `workspace/design-system.md`. Não releia PRD inteiro a cada tarefa.
-10. **Design System é pré-requisito de UI** — `workspace/design-system.md` deve existir antes de qualquer tarefa de tela. Nunca implemente UI sem o Design System definido.
+9. **Economia de tokens** — na Fase EXECUTE, leia apenas o campo `instructions` da tarefa + `agent-brain.md`. Exceção: tarefas de UI leem também `workspace/[projeto]/design-system.md`. Não releia PRD inteiro a cada tarefa.
+10. **Design System é pré-requisito de UI** — `workspace/[projeto]/design-system.md` deve existir antes de qualquer tarefa de tela. Nunca implemente UI sem o Design System definido.
 11. **Validação Final é obrigatória** — antes de declarar projeto concluído, execute a Validação Final Integrada (técnica + visual).
 
 ---
@@ -124,7 +131,7 @@ Todo projeto gerado DEVE incluir, conforme a stack:
 | **Rate limiting** | Implementar em rotas de login e APIs públicas. |
 
 ### Arquivos do Sistema — Risco ao PC do Usuário
-- **NUNCA** acesse, leia, modifique ou delete arquivos fora do diretório do projeto (`apps/[projeto]/` e `workspace/`).
+- **NUNCA** acesse, leia, modifique ou delete arquivos fora do diretório do projeto (`meta.app_dir` e `workspace/`).
 - **NUNCA** rode comandos que afetam o sistema operacional do usuário: `rm -rf /`, modificações em `/etc/`, alterações em variáveis de ambiente globais, instalações globais sem aviso.
 - Se uma tarefa exigir instalação global (ex: `npm install -g`), documente e avise o usuário antes.
 
@@ -143,7 +150,7 @@ Se a qualidade das respostas degradar (repetições, esquecimentos, erros cresce
 ## Estado Persistente
 
 O estado do agente vive em dois lugares:
-- **`workspace/prd.json`** — estado das tarefas do projeto atual (pending/in_progress/completed/blocked)
+- **`workspace/[projeto]/prd.json`** — estado das tarefas do projeto atual (`meta.workspace_dir` define o path exato) (pending/in_progress/completed/blocked)
 - **`workspace/memory/agent-brain.md`** — memória acumulada do agente entre TODOS os projetos
 
 Mantenha ambos sempre atualizados.

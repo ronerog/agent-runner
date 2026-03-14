@@ -9,7 +9,7 @@ Este é o único momento de planejamento. Seja exaustivo aqui para não precisar
 
 Leia o pedido do usuário. Pense como Product Owner sênior que conhece o mercado.
 
-**Crie `workspace/PRD.md` contendo:**
+**Crie `workspace/[projeto]/PRD.md` contendo:**
 - Resumo Executivo: o que é o produto, problema que resolve, para quem
 - Personas: perfis dos usuários reais (nome fictício, cargo, necessidade)
 - User Stories: "Como [persona], quero [ação] para [benefício]"
@@ -18,7 +18,7 @@ Leia o pedido do usuário. Pense como Product Owner sênior que conhece o mercad
 - Fluxo de Telas (diagrama Mermaid): todas as telas, navegação entre elas
 - Critérios de Aceite por RF
 
-**Crie `workspace/requirements/[projeto].md`** com a lista completa formatada.
+**Crie `workspace/[projeto]/requirements.md`** com a lista completa formatada.
 
 > **Regra do Analista**: Nunca faça apenas o mínimo. Deduza features implícitas que o usuário "esqueceu". Pesquise mentalmente o que produtos reais do mesmo nicho oferecem.
 
@@ -52,13 +52,17 @@ Exemplos de decisões válidas:
 - CLI tool → Rust ou Go
 - App mobile → React Native ou Flutter
 
-Documente no `workspace/PRD.md` (seção técnica):
+Documente no `workspace/[projeto]/PRD.md` (seção técnica):
 - Stack escolhida (cada camada justificada)
 - Estrutura de pastas completa do projeto
 - Schema / modelo de dados
 - Padrões de código do projeto (naming, estrutura, convenções da linguagem)
 
-**Defina os comandos de verificação da stack escolhida.** Estes comandos serão usados na Fase EXECUTE para garantir qualidade. Exemplos por stack:
+**Defina os comandos de verificação da stack escolhida.** Estes comandos serão usados na Fase EXECUTE para garantir qualidade.
+
+> **Atenção**: `app_dir` deve ser o path absoluto fora do agent-runner. Leia `PROJECTS_ROOT` de `workspace/memory/global.md` e use `{PROJECTS_ROOT}/[nome-do-projeto]`. Crie o diretório `workspace/[projeto]/` para os artefatos de planejamento.
+
+Exemplos por stack:
 
 | Stack | check_cmd | test_cmd | lint_cmd | run_cmd |
 |-------|-----------|----------|----------|---------|
@@ -75,13 +79,13 @@ Documente no `workspace/PRD.md` (seção técnica):
 
 Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 
-**Crie `workspace/design-system.md`** — este arquivo é o **contrato visual** do projeto e é obrigatório. Sem ele, nenhuma tarefa de UI pode ser implementada. Siga o template definido em `agent/roles/designer.md`. Deve conter:
+**Crie `workspace/[projeto]/design-system.md`** — este arquivo é o **contrato visual** do projeto e é obrigatório. Sem ele, nenhuma tarefa de UI pode ser implementada. Siga o template definido em `agent/roles/designer.md`. Deve conter:
 - Todas as variáveis CSS com valores concretos (cores, tipografia, espaçamentos, bordas, sombras)
 - URL de import das fontes (Google Fonts ou sistema)
 - Lista completa de componentes base a criar em `components/ui/`
 - Layout descrito para cada tela principal
 
-**Atualize `workspace/PRD.md`** (seção Design) com:
+**Atualize `workspace/[projeto]/PRD.md`** (seção Design) com:
 - Referências visuais do nicho (sites reais similares)
 - Intenção estética e mood do projeto
 - Resumo das decisões de design
@@ -94,7 +98,7 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 
 ## Etapa 4: Tradução para Tarefas Atômicas
 
-**Gere `workspace/prd.json`.** O arquivo tem duas seções: `meta` (cabeçalho do projeto) e `tasks` (tarefas atômicas).
+**Gere `workspace/[projeto]/prd.json`.** O arquivo tem duas seções: `meta` (cabeçalho do projeto) e `tasks` (tarefas atômicas).
 
 ### Seção `meta` (preenchida pelo Arquiteto + Designer)
 
@@ -103,27 +107,28 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
   "meta": {
     "project": "nome-do-projeto",
     "stack": "Descrição da stack (ex: Python/Django + PostgreSQL)",
-    "app_dir": "apps/nome-do-projeto",
-    "check_cmd": "comando que valida se o código está correto (type check, compile check, etc.)",
+    "workspace_dir": "workspace/nome-do-projeto",
+    "app_dir": "~/projects/nome-do-projeto",
+    "check_cmd": "cd ~/projects/nome-do-projeto && comando-de-check",
     "test_cmd": "comando que roda os testes automatizados",
     "lint_cmd": "comando de lint/formatação (null se não aplicável)",
     "run_cmd": "comando para rodar o projeto em dev",
     "has_ui": true,
-    "visual_check_cmd": "grep -c 'var(--color-primary)' apps/nome-do-projeto/app/globals.css"
+    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/nome-do-projeto/app/globals.css"
   },
   "tasks": []
 }
 ```
 
 - `has_ui`: `true` se o projeto tem interface visual (web, mobile). `false` para API pura, CLI, daemon.
-- `visual_check_cmd`: comando que verifica se as variáveis CSS do Design System estão aplicadas. Deve retornar > 0. Exemplo: `grep -c "var(--color-primary)" apps/proj/app/globals.css`. Se `has_ui: false`, use `null`.
+- `visual_check_cmd`: comando que verifica se as variáveis CSS do Design System estão aplicadas. Deve retornar > 0. Exemplo: `grep -c "var(--color-primary)" {app_dir}/app/globals.css`. Se `has_ui: false`, use `null`.
 
 **O `check_cmd` é crítico**: deve ser um comando rápido que falha se o código tiver erros básicos.
-- TypeScript: `cd apps/proj && yarn tsc --noEmit`
-- Python: `cd apps/proj && python -m py_compile $(find . -name "*.py" | head -20)`
-- Go: `cd apps/proj && go build ./...`
-- Rust: `cd apps/proj && cargo check`
-- Ruby: `cd apps/proj && ruby -c app/**/*.rb`
+- TypeScript: `cd {app_dir} && yarn tsc --noEmit`
+- Python: `cd {app_dir} && python -m py_compile $(find . -name "*.py" | head -20)`
+- Go: `cd {app_dir} && go build ./...`
+- Rust: `cd {app_dir} && cargo check`
+- Ruby: `cd {app_dir} && ruby -c app/**/*.rb`
 - Se não houver check rápido disponível: use o `test_cmd` no lugar
 
 ### Seção `tasks` — Regras de Atomicidade (CRÍTICO)
@@ -138,7 +143,7 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
   "role": "dev",
   "type": "backend",
   "task": "Descrição concisa (verbo + objeto)",
-  "file": "apps/[projeto]/caminho/exato/do/arquivo.ext",
+  "file": "{app_dir}/caminho/exato/do/arquivo.ext",
   "instructions": "Instrução completa e auto-suficiente: o que criar, qual lógica, quais imports, qual comando. Escreva como se a IA não tivesse lido nada antes.",
   "done_when": "Critério objetivo: 'arquivo existe', 'check_cmd roda sem erro', 'rota /X retorna 200'",
   "rf": ["RF01"],
@@ -174,8 +179,8 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 2. **Dependências** (install de tudo que será usado)
 3. **Configurações** (env vars, settings, config files)
 4. **Schema / modelo de dados** (migrations, ORM models)
-5. **Design System — globals.css** (se `has_ui: true`: OBRIGATÓRIO antes de qualquer tela — cria `app/globals.css` com TODAS as variáveis CSS de `workspace/design-system.md`)
-6. **Componentes base** (se `has_ui: true`: cria cada componente listado em `workspace/design-system.md` em `components/ui/`, um por tarefa)
+5. **Design System — globals.css** (se `has_ui: true`: OBRIGATÓRIO antes de qualquer tela — cria `app/globals.css` com TODAS as variáveis CSS de `workspace/[projeto]/design-system.md`)
+6. **Componentes base** (se `has_ui: true`: cria cada componente listado em `workspace/[projeto]/design-system.md` em `components/ui/`, um por tarefa)
 7. **Backend / lógica de negócio** (services, controllers, views, API routes)
 8. **Frontend / Interface** (uma tela/página por tarefa — SEMPRE após Design System e Componentes Base)
 9. **Integrações externas** (APIs, emails, pagamentos)
@@ -192,16 +197,17 @@ Antes de finalizar, verifique item por item:
 
 - [ ] Seção `meta` do `prd.json` está completa com `check_cmd` e `test_cmd` válidos para a stack
 - [ ] `has_ui` está definido corretamente (`true` para projetos com interface, `false` para API/CLI)
-- [ ] Se `has_ui: true`: `visual_check_cmd` está definido e `workspace/design-system.md` foi criado
+- [ ] Se `has_ui: true`: `visual_check_cmd` está definido e `workspace/[projeto]/design-system.md` foi criado
 - [ ] Se `has_ui: true`: existe tarefa de globals.css ANTES de qualquer tarefa de tela
-- [ ] Se `has_ui: true`: existe tarefa para cada componente base de `workspace/design-system.md`
+- [ ] Se `has_ui: true`: existe tarefa para cada componente base de `workspace/[projeto]/design-system.md`
 - [ ] Cada RF do PRD tem pelo menos uma tarefa no `prd.json`
 - [ ] A primeira tarefa é o setup do projeto
 - [ ] A última tarefa inclui testes
 - [ ] Cada tarefa tem `instructions` completas (auto-suficiente, sem depender de leitura externa)
 - [ ] Cada tarefa tem `done_when` objetivo e testável
-- [ ] `workspace/requirements/[projeto].md` foi criado
-- [ ] `workspace/PRD.md` foi criado com todas as seções
+- [ ] Diretório `workspace/[projeto]/` foi criado com PRD.md, prd.json e (se `has_ui`) design-system.md
+- [ ] `workspace/[projeto]/requirements.md` foi criado
+- [ ] `workspace/[projeto]/PRD.md` foi criado com todas as seções
 
 Ao concluir, informe:
 **"Planejamento concluído. Stack: [stack]. [N] tarefas geradas para [nome do projeto]. Iniciando execução da Tarefa 1."**

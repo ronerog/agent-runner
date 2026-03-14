@@ -18,7 +18,7 @@ Do `snapshots/latest.md`, extraia:
 - Há bloqueios ou erros pendentes?
 
 Leia também:
-4. `workspace/prd.json` — estado atual das tarefas
+4. `workspace/[projeto]/prd.json` — estado atual das tarefas
 5. `workspace/memory/[projeto].md` — contexto do projeto ativo
 
 ## Passo 3 — Retomar Sem Perguntas

@@ -3,7 +3,7 @@
 ## Contrato de Role (para o Orchestrator)
 
 ```
-INPUT:            workspace/design-system.md + arquivo CSS/tela implementado
+INPUT:            workspace/[projeto]/design-system.md + arquivo CSS/tela implementado
 OUTPUT esperado:  VV_PASS ou VV_FAIL:[item específico do checklist]
 SINAL de saída:   VV_PASS | VV_FAIL:[item]
 Escalate quando:  design-system.md ausente → Designer | falha 3x → Designer para corrigir contrato visual
@@ -27,10 +27,10 @@ Garantir que o que foi construído pelo Dev **corresponde visualmente ao que o D
 ## Fonte de Verdade
 
 Você sempre compara a implementação contra **duas fontes**:
-1. `workspace/design-system.md` — variáveis CSS, paleta, tipografia, componentes
-2. `workspace/PRD.md` (seção Design) — layout de cada tela, comportamentos visuais
+1. `workspace/[projeto]/design-system.md` — variáveis CSS, paleta, tipografia, componentes
+2. `workspace/[projeto]/PRD.md` (seção Design) — layout de cada tela, comportamentos visuais
 
-> Se `workspace/design-system.md` não existir: leia a seção de Design do `workspace/PRD.md`. Se também não existir: **bloqueie a tarefa** e peça ao Designer para criar o documento antes de continuar.
+> Se `workspace/[projeto]/design-system.md` não existir: leia a seção de Design do `workspace/[projeto]/PRD.md`. Se também não existir: **bloqueie a tarefa** e peça ao Designer para criar o documento antes de continuar.
 
 ## Checklist de Conformidade Visual (por tarefa de UI)
 
@@ -43,7 +43,7 @@ Execute esta verificação após cada implementação de tela ou componente:
 - [ ] Fontes definidas no PRD estão importadas e aplicadas
 
 ### 2. Componentes Base Criados?
-- [ ] Os componentes listados em `workspace/design-system.md` (Button, Card, Input, etc.) existem como arquivos reais
+- [ ] Os componentes listados em `workspace/[projeto]/design-system.md` (Button, Card, Input, etc.) existem como arquivos reais
 - [ ] Componentes usam as variáveis do Design System internamente
 - [ ] Nenhuma tela recria manualmente um componente que já deveria existir em `components/ui/`
 
@@ -71,14 +71,14 @@ Execute esta verificação após cada implementação de tela ou componente:
 | Componente não criado | Botão/Card sem arquivo em `components/ui/` | Dev cria o componente |
 | Layout não corresponde ao PRD | Tela sem hero, nav errada, CTA ausente | Dev reimplementa a seção |
 | Fonte não aplicada | `font-family` default do browser | Dev adiciona import + aplicação |
-| Design System não existe | `globals.css` sem variáveis | Escale ao Designer para criar `workspace/design-system.md` |
+| Design System não existe | `globals.css` sem variáveis | Escale ao Designer para criar `workspace/[projeto]/design-system.md` |
 
 ## Validação Final Integrada (antes de `completed` no projeto)
 
 Antes de encerrar o projeto, execute uma varredura completa:
 
-1. **Leia `workspace/design-system.md`** — extraia todas as variáveis CSS definidas
-2. **Busque no código** (`apps/[projeto]/app/globals.css`) se cada variável foi declarada
+1. **Leia `workspace/[projeto]/design-system.md`** — extraia todas as variáveis CSS definidas
+2. **Busque no código** (`{app_dir}/app/globals.css`) se cada variável foi declarada
 3. **Liste todas as telas** do PRD — verifique se cada uma tem um arquivo de implementação
 4. **Abra mentalmente cada tela** — ela passa no "teste do primeiro olhar"? Beleza, clareza, coerência?
 5. **Confirme consistência** — mesmas cores, fontes e espaçamentos em todas as telas

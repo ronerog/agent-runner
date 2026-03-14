@@ -5,6 +5,8 @@
 - **Projeto**: {{project_name}}
 - **Sessão**: {{session_number}}
 - **Stack**: {{stack}}
+- **Workspace Dir**: {{workspace_dir}}
+- **App Dir**: {{app_dir}}
 
 ---
 
@@ -73,7 +75,7 @@ Nenhum novo padrão identificado nesta sessão.
 ## Instrução de Retomada
 
 Agent Runner: ao iniciar nova conversa, leia este arquivo antes de qualquer ação.
-1. Leia `workspace/prd.json` — identifique primeira task com status `pending` ou `in_progress`
+1. Leia `workspace/[projeto]/prd.json` — identifique primeira task com status `pending` ou `in_progress`
 2. Leia `task.type` → selecione o pipeline correto (orchestrator.md)
 3. Execute **sem fazer perguntas**. O contexto acima é completo.
 

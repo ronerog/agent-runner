@@ -20,7 +20,7 @@ Leia agent/prompts/inject.md e execute a Fase AUDIT completa:
 
 FASE 2 — TASK SYNTHESIS
 
-Crie workspace/prd.json com mode: "inject" contendo APENAS as tasks solicitadas.
+Crie workspace/[projeto]/prd.json com mode: "inject" contendo APENAS as tasks solicitadas.
 Cada task deve ter type definido (setup|config|schema|backend|ui-setup|ui-component|ui-screen|integration|test|docs|notebook|pipeline|viz|model|report|r-script|r-shiny).
 As instructions devem respeitar os padrões do projeto existente identificados no AUDIT.
 

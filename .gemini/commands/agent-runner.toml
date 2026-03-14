@@ -19,10 +19,10 @@ Leia agent/prompts/plan.md e execute como time completo:
 Analista → Arquiteto → Designer → Task Breakdown
 
 Produza obrigatoriamente:
-- workspace/PRD.md — requisitos, personas, user stories, fluxo de telas
-- workspace/requirements/[projeto].md — lista detalhada de RFs e RNFs
-- workspace/prd.json — tarefas atômicas com instructions auto-suficientes
-- workspace/design-system.md — se has_ui: true: contrato visual completo
+- workspace/[projeto]/PRD.md — requisitos, personas, user stories, fluxo de telas
+- workspace/[projeto]/requirements.md — lista detalhada de RFs e RNFs
+- workspace/[projeto]/prd.json — tarefas atômicas com instructions auto-suficientes
+- workspace/[projeto]/design-system.md — se has_ui: true: contrato visual completo
 
 O prd.json tem seção meta com os comandos da stack (check_cmd, test_cmd, lint_cmd, run_cmd, has_ui, visual_check_cmd). Cada tarefa tem campo 'type' que determina o pipeline (ver agent/prompts/orchestrator.md):
 - Web: setup|config|schema|backend|ui-setup|ui-component|ui-screen|integration|test|docs

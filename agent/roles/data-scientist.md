@@ -3,7 +3,7 @@
 ## Contrato de Role (para o Orchestrator)
 
 ```
-INPUT (PLAN):     workspace/PRD.md (seção de dados/análise) + stack escolhida pelo Architect
+INPUT (PLAN):     workspace/[projeto]/PRD.md (seção de dados/análise) + stack escolhida pelo Architect
 INPUT (VERIFY):   task.done_when + arquivo implementado (notebook/pipeline/model/report)
 OUTPUT (PLAN):    Seção "Metodologia Estatística" no PRD.md + tasks de análise no prd.json
 OUTPUT (VERIFY):  DS_PASS ou DS_FAIL:[motivo estatístico específico]
@@ -46,7 +46,7 @@ Garantir que a análise seja **estatisticamente válida**, **reprodutível** e *
 
 ### 1. Metodologia Estatística no PRD.md
 
-Adicione seção **"Metodologia Estatística"** ao `workspace/PRD.md` com:
+Adicione seção **"Metodologia Estatística"** ao `workspace/[projeto]/PRD.md` com:
 - Objetivo analítico (descrever? comparar? predizer? classificar? sobrevivência?)
 - Variáveis: dependente, independentes, confundidoras
 - Testes escolhidos e justificativa (veja tabela abaixo)
@@ -60,31 +60,31 @@ O DS define as tasks de análise e seus tipos. Cada task deve ser atômica:
 
 ```json
 { "id": N, "type": "pipeline", "task": "Ingestão e limpeza dos dados brutos",
-  "file": "apps/proj/src/01_data_cleaning.py",
+  "file": "{app_dir}/src/01_data_cleaning.py",
   "instructions": "...",
   "done_when": "script executa sem erros, df.isnull().sum() == 0 para colunas obrigatórias",
   "rf": ["RF01"], "status": "pending" }
 
 { "id": N, "type": "notebook", "task": "EDA completa",
-  "file": "apps/proj/notebooks/02_eda.ipynb",
+  "file": "{app_dir}/notebooks/02_eda.ipynb",
   "instructions": "...",
   "done_when": "notebook executa do início ao fim sem erros, todas as visualizações geradas",
   "rf": ["RF02"], "status": "pending" }
 
 { "id": N, "type": "model", "task": "Modelo de regressão logística com validação",
-  "file": "apps/proj/src/03_model.py",
+  "file": "{app_dir}/src/03_model.py",
   "instructions": "...",
   "done_when": "modelo treinado, AUC > 0.7, joblib salvo, métricas impressas",
   "rf": ["RF03"], "status": "pending" }
 
 { "id": N, "type": "viz", "task": "Curvas de Kaplan-Meier por grupo de tratamento",
-  "file": "apps/proj/notebooks/04_survival.R",
+  "file": "{app_dir}/notebooks/04_survival.R",
   "instructions": "...",
   "done_when": "plot gerado com pval, risk table, IC 95%",
   "rf": ["RF04"], "status": "pending" }
 
 { "id": N, "type": "report", "task": "Relatório final em Quarto",
-  "file": "apps/proj/report/analysis.qmd",
+  "file": "{app_dir}/report/analysis.qmd",
   "instructions": "...",
   "done_when": "quarto render retorna sem erro, PDF gerado",
   "rf": ["RF05"], "status": "pending" }
@@ -322,8 +322,8 @@ regtest(res)   # teste de viés de publicação (Egger)
 ## Artefatos que Produzo
 
 **No PLAN:**
-- Seção "Metodologia Estatística" em `workspace/PRD.md`
-- Tasks de análise (`notebook`, `pipeline`, `viz`, `model`, `report`, `r-script`, `r-shiny`) no `workspace/prd.json`
+- Seção "Metodologia Estatística" em `workspace/[projeto]/PRD.md`
+- Tasks de análise (`notebook`, `pipeline`, `viz`, `model`, `report`, `r-script`, `r-shiny`) no `workspace/[projeto]/prd.json`
 - Decisões metodológicas em `workspace/memory/[projeto].md`
 
 **No VERIFY:**

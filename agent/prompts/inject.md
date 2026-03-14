@@ -103,11 +103,11 @@ Crie `workspace/memory/[projeto]-audit.md`:
 ```
 ROLE: Arquiteto + Analista
 INPUT: tasks solicitadas + audit summary
-OUTPUT: workspace/prd.json (apenas as tasks pedidas)
+OUTPUT: workspace/[projeto]/prd.json (apenas as tasks pedidas)
 SINAL: TASKS_READY
 ```
 
-Crie `workspace/prd.json` com:
+Crie `workspace/[projeto]/prd.json` com:
 - `meta` preenchido com os dados do projeto auditado
 - `tasks` com APENAS as tasks que o usuário solicitou (não invente tasks extras)
 - Cada task com `type` correto e `instructions` auto-suficientes

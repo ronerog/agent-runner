@@ -3,7 +3,7 @@
 ## Contrato de Role (para o Orchestrator)
 
 ```
-INPUT:            workspace/prd.json + workspace/memory/[projeto].md
+INPUT:            workspace/[projeto]/prd.json + workspace/memory/[projeto].md
 OUTPUT esperado:  workspace/memory/snapshots/latest.md completo
 SINAL de saída:   SNAPSHOT_READY
 Invocado quando:  > 40 trocas na sessão | contradição detectada | context drift | usuário reportou esquecimento
@@ -28,7 +28,7 @@ Ative proativamente quando:
 
 ## Protocolo de Consolidação
 
-1. **Leia** `workspace/prd.json` — liste tarefas pending/in_progress/blocked/completed
+1. **Leia** `workspace/[projeto]/prd.json` — liste tarefas pending/in_progress/blocked/completed
 2. **Leia** `workspace/memory/[projeto].md` — extraia decisões e bloqueios ativos
 3. **Gere** `workspace/memory/snapshots/latest.md` usando o template em `agent/prompts/snapshot_template.md`
 4. **Atualize** `workspace/memory/agent-brain.md` se houver aprendizado novo desta sessão

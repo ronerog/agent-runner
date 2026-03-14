@@ -60,9 +60,9 @@ O Orchestrator **não é um papel** — é a camada de controle que decide:
 
 | De | Para | Condição |
 |----|------|----------|
-| INIT | PLAN | `workspace/prd.json` não existe |
-| INIT | EXECUTE_LOOP | `workspace/prd.json` existe com tasks `pending` |
-| INIT | VALIDATE | `workspace/prd.json` existe, todas as tasks `completed` ou `blocked` |
+| INIT | PLAN | Nenhum `prd.json` em `workspace/*/` existe |
+| INIT | EXECUTE_LOOP | Existe `workspace/[projeto]/prd.json` com tasks `pending` |
+| INIT | VALIDATE | Existe `workspace/[projeto]/prd.json`, todas as tasks `completed` ou `blocked` |
 | PLAN | EXECUTE_LOOP | `prd.json` criado + todas tasks `pending` + `design-system.md` criado (se `has_ui: true`) |
 | EXECUTE | LEARN_RÁPIDO | Task marcada `completed` |
 | EXECUTE | EXECUTE (mesma task) | QA retorna `FAIL` + tentativas < 3 |
@@ -112,16 +112,16 @@ Contexto extra aumenta custo e não melhora qualidade.
 
 | Role | Contexto Injetado | Output Esperado | Sinal de Conclusão |
 |------|------------------|-----------------|-------------------|
-| **Analista** | Pedido do usuário | `workspace/PRD.md` + `requirements/[proj].md` | `PRD_READY` |
+| **Analista** | Pedido do usuário | `workspace/[projeto]/PRD.md` + `workspace/[projeto]/requirements.md` | `PRD_READY` |
 | **Arquiteto** | PRD.md (seção funcional) + agent-brain (stack expertise) | Stack + folder structure + schema + meta | `ARCH_READY` |
 | **Data Scientist** | PLAN: PRD.md (seção dados) + stack | Metodologia estatística + tasks de análise no prd.json | `DS_READY` |
 | **Data Scientist** (VERIFY) | arquivo implementado (notebook/model/viz/report) + task.done_when | Validação estatística: metodologia, assunções, reporting | `DS_PASS` / `DS_FAIL:[motivo]` |
-| **Designer** | PRD.md (seção UI/nicho) + stack | `workspace/design-system.md` + tasks de UI no prd.json | `DESIGN_READY` |
+| **Designer** | PRD.md (seção UI/nicho) + stack | `workspace/[projeto]/design-system.md` + tasks de UI no prd.json | `DESIGN_READY` |
 | **Dev** | `task.instructions` + agent-brain.md + design-system.md (se UI) | Arquivo em `task.file` criado/modificado | `IMPL_READY` |
 | **QA** | `task.done_when` + `meta.check_cmd` + arquivo implementado | `PASS` ou `FAIL:[motivo]` | `QA_PASS` / `QA_FAIL` |
 | **Visual Validator** | `design-system.md` + arquivo CSS/tela implementado | `VISUAL_PASS` ou `VISUAL_FAIL:[item]` | `VV_PASS` / `VV_FAIL` |
 | **Learner** | Erros e decisões da task atual (somente) | Entrada em agent-brain.md (ou silêncio) | silêncio ou `LEARNED` |
-| **Manager** | `prd.json` + `[projeto].md` | `workspace/memory/snapshots/latest.md` | `SNAPSHOT_READY` |
+| **Manager** | `prd.json` + `[projeto].md` + `workspace_dir` | `workspace/memory/snapshots/latest.md` | `SNAPSHOT_READY` |
 
 ### Regra de Contexto
 
@@ -203,6 +203,8 @@ Invoque `agent/roles/data-scientist.md` durante PLAN quando o projeto envolver:
 
 Um snapshot bem feito deve permitir que a próxima sessão **execute imediatamente sem perguntas**.
 Se a nova sessão precisar perguntar algo → o snapshot falhou.
+
+> O snapshot deve registrar `workspace_dir` e `app_dir` ativos para que a próxima sessão saiba onde encontrar o `prd.json`.
 
 ---
 

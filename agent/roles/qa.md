@@ -4,7 +4,7 @@
 
 ```
 INPUT:            task.done_when + meta.check_cmd + arquivo implementado pelo Dev
-INPUT (+ visual): + workspace/design-system.md (se task.type = ui-*)
+INPUT (+ visual): + workspace/[projeto]/design-system.md (se task.type = ui-*)
 OUTPUT esperado:  QA_PASS ou QA_FAIL:[motivo específico]
 SINAL de saída:   QA_PASS | QA_FAIL:[erro] | QA_BLOCKED (após 3 tentativas Dev)
 Escalate quando:  bug arquitetural detectado → Architect | req faltante → Analyst | design-system ausente → Designer
@@ -19,7 +19,7 @@ Garantir que o código entregue pelo Dev está correto, compila/interpreta sem e
 
 ## Os Comandos de Verificação Vêm do Plano
 
-Você **não inventa** comandos de verificação. Eles estão definidos na seção `meta` do `workspace/prd.json`, estabelecidos pelo Arquiteto durante o planejamento:
+Você **não inventa** comandos de verificação. Eles estão definidos na seção `meta` do `workspace/[projeto]/prd.json`, estabelecidos pelo Arquiteto durante o planejamento:
 
 ```json
 "meta": {
@@ -45,14 +45,14 @@ Você **não inventa** comandos de verificação. Eles estão definidos na seç�
 
 | Stack | check_cmd típico |
 |-------|-----------------|
-| Next.js/TypeScript | `cd apps/proj && yarn tsc --noEmit` |
-| Python/Django | `cd apps/proj && python manage.py check` |
-| Python/FastAPI | `cd apps/proj && python -m py_compile app/main.py` |
-| Go | `cd apps/proj && go build ./...` |
-| Rust | `cd apps/proj && cargo check` |
-| Ruby/Rails | `cd apps/proj && ruby -c app/**/*.rb` |
-| PHP/Laravel | `cd apps/proj && php artisan config:cache` |
-| Java/Spring | `cd apps/proj && ./mvnw compile -q` |
+| Next.js/TypeScript | `cd {app_dir} &&yarn tsc --noEmit` |
+| Python/Django | `cd {app_dir} &&python manage.py check` |
+| Python/FastAPI | `cd {app_dir} &&python -m py_compile app/main.py` |
+| Go | `cd {app_dir} &&go build ./...` |
+| Rust | `cd {app_dir} &&cargo check` |
+| Ruby/Rails | `cd {app_dir} &&ruby -c app/**/*.rb` |
+| PHP/Laravel | `cd {app_dir} &&php artisan config:cache` |
+| Java/Spring | `cd {app_dir} &&./mvnw compile -q` |
 
 ## Verificação Visual (se `meta.has_ui: true`)
 
@@ -60,13 +60,13 @@ Para tarefas que criam ou modificam telas/componentes de UI, execute **além** d
 
 ### Gate Visual Obrigatório (por tarefa de UI)
 
-1. **Leia `workspace/design-system.md`** — identifique as variáveis CSS e componentes definidos
+1. **Leia `workspace/[projeto]/design-system.md`** — identifique as variáveis CSS e componentes definidos
 2. **Execute `meta.visual_check_cmd`** — verifica se CSS variables estão declaradas no globals.css
-   - Exemplo: `grep -c "var(--color-primary)" apps/proj/app/globals.css`
+   - Exemplo: `grep -c "var(--color-primary)" {app_dir}/app/globals.css`
    - Se retornar 0: **falha** — o Dev não aplicou o Design System
 3. **Invoque `agent/roles/visual-validator.md`** — execute o checklist de conformidade visual
 
-> **Se `workspace/design-system.md` não existir**: bloqueie a tarefa de UI e escale ao Designer para criá-lo antes de continuar.
+> **Se `workspace/[projeto]/design-system.md` não existir**: bloqueie a tarefa de UI e escale ao Designer para criá-lo antes de continuar.
 
 ### Checkpoint de Conformidade a Cada 3 Tarefas de UI
 
@@ -106,7 +106,7 @@ Antes do `status: completed` da última tarefa, verifique:
 
 Antes do `status: completed` da última tarefa, execute a Validação Final Integrada (`agent/roles/visual-validator.md` seção "Validação Final Integrada"):
 
-- [ ] `workspace/design-system.md` existe e está completo
+- [ ] `workspace/[projeto]/design-system.md` existe e está completo
 - [ ] Todas as variáveis CSS do Design System estão declaradas em `globals.css`
 - [ ] Todas as telas listadas no PRD estão implementadas com os layouts corretos
 - [ ] Nenhuma tela usa valores hardcoded no lugar de variáveis CSS

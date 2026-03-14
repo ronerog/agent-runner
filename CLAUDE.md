@@ -47,7 +47,8 @@ O `prd.json` tem seção `meta` com os comandos da stack e cada tarefa tem um ca
     "project": "...", "stack": "...", "workspace_dir": "workspace/[nome-do-projeto]", "app_dir": "~/projects/[nome-do-projeto]",
     "check_cmd": "...", "test_cmd": "...", "lint_cmd": "...", "run_cmd": "...",
     "has_ui": true,
-    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/[nome-do-projeto]/app/globals.css"
+    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/[nome-do-projeto]/app/globals.css",
+    "use_build_container": false, "container_image": null, "container_name": null
   },
   "tasks": [
     { "id": 1, "type": "setup", "task": "...", "file": "...", "instructions": "...", "done_when": "...", "rf": ["RF01"], "status": "pending" }
@@ -66,6 +67,7 @@ Se o projeto envolve dados/stats/ML: invoque também `agent/roles/data-scientist
 - Nunca replaneie depois. O `prd.json` é lei (só adicione tarefas, nunca delete)
 - Toda tarefa deve ter `type` definido — sem `type`, o Orchestrator não sabe qual pipeline usar
 - Se `has_ui: true`: tarefas `ui-setup` e `ui-component` ANTES de qualquer `ui-screen`
+- Se stack requer runtime pesado (R, Go, Rust, Java): `use_build_container: true` + `container_image` definida. Nunca instalar na máquina do usuário.
 - Ao concluir: informe stack + nº de tarefas e inicie EXECUTE imediatamente
 
 ---

@@ -114,7 +114,13 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
     "lint_cmd": "comando de lint/formatação (null se não aplicável)",
     "run_cmd": "comando para rodar o projeto em dev",
     "has_ui": true,
-    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/nome-do-projeto/app/globals.css"
+    "visual_check_cmd": "grep -c 'var(--color-primary)' ~/projects/nome-do-projeto/app/globals.css",
+    "use_build_container": false,
+    "container_image": null,
+    "container_name": null,
+    "container_workspace": "/workspace",
+    "container_ports": [],
+    "container_volumes": []
   },
   "tasks": []
 }
@@ -122,6 +128,12 @@ Com base no PRD e stack, se o projeto tem interface visual (`has_ui: true`):
 
 - `has_ui`: `true` se o projeto tem interface visual (web, mobile). `false` para API pura, CLI, daemon.
 - `visual_check_cmd`: comando que verifica se as variáveis CSS do Design System estão aplicadas. Deve retornar > 0. Exemplo: `grep -c "var(--color-primary)" {app_dir}/app/globals.css`. Se `has_ui: false`, use `null`.
+- `use_build_container`: `true` quando a stack requer instalação de runtimes/ferramentas que não devem ser instaladas na máquina do usuário (R, Go, Rust, Java, Python com extensões C). `false` para stacks leves (Node.js, Python puro). Veja `agent/roles/architect.md` seção "Docker de Build Temporário" para critérios e imagens recomendadas.
+- `container_image`: imagem Docker base (ex: `rocker/tidyverse:4.5`, `python:3.12-slim`, `golang:1.22-alpine`). Obrigatório se `use_build_container: true`.
+- `container_name`: nome do container (padrão: `build-[nome-do-projeto]`). Obrigatório se `use_build_container: true`.
+- `container_workspace`: diretório de trabalho dentro do container (padrão: `/workspace`).
+- `container_ports`: portas para expor ao host (ex: `["8787:8787"]`).
+- `container_volumes`: volumes montados. Sempre inclua `["{app_dir}:/workspace"]`.
 
 **O `check_cmd` é crítico**: deve ser um comando rápido que falha se o código tiver erros básicos.
 - TypeScript: `cd {app_dir} && yarn tsc --noEmit`
@@ -198,6 +210,8 @@ Antes de finalizar, verifique item por item:
 - [ ] Seção `meta` do `prd.json` está completa com `check_cmd` e `test_cmd` válidos para a stack
 - [ ] `has_ui` está definido corretamente (`true` para projetos com interface, `false` para API/CLI)
 - [ ] Se `has_ui: true`: `visual_check_cmd` está definido e `workspace/[projeto]/design-system.md` foi criado
+- [ ] `use_build_container` avaliado: se a stack requer runtime pesado (R, Go, Rust, Java), está `true` com `container_image` definida
+- [ ] Se `use_build_container: true`: `check_cmd`/`test_cmd`/`lint_cmd` escritos para execução dentro do container (sem `docker exec` — o script adiciona automaticamente)
 - [ ] Se `has_ui: true`: existe tarefa de globals.css ANTES de qualquer tarefa de tela
 - [ ] Se `has_ui: true`: existe tarefa para cada componente base de `workspace/[projeto]/design-system.md`
 - [ ] Cada RF do PRD tem pelo menos uma tarefa no `prd.json`

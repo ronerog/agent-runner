@@ -46,6 +46,14 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 - `requirements.txt` deve estar sempre atualizado após `pip install`
 - Nunca hardcode secrets — usar variáveis de ambiente
 
+### Geral — Docker de Build Temporário
+- **Nunca instale runtimes/compiladores na máquina do usuário** — use `use_build_container: true` no `prd.json`
+- Stacks que exigem container: R, Go, Rust, Java, Ruby, Python com extensões C (scipy, pandas)
+- Stacks que NÃO exigem container: Node.js/TypeScript, Python puro (sem extensões C)
+- Script: `agent/scripts/docker_build_env.sh` (start/exec/stop/status)
+- Comandos de verificação (check_cmd, test_cmd) devem rodar dentro do container via `docker_build_env.sh exec`
+- README do projeto deve documentar dependências para execução nativa (sem Docker)
+
 ### Go
 - Tratar todos os erros explicitamente (`if err != nil`)
 - `go.sum` deve ser commitado junto com `go.mod`
@@ -668,6 +676,13 @@ run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
 
 ### Processo: Ignorar prd.json e requirements
 - **Regra**: "Nunca implemente sem prd.json. Resultados sem estrutura não seguem o contrato com o usuário."
+
+### Processo: Instalar dependências na máquina do usuário
+- **Problema**: Ao construir projetos que exigem R, Go, Rust, Java ou Python com extensões C, o agente instalava runtimes e pacotes diretamente na máquina do usuário, sujando o ambiente e dificultando a limpeza posterior.
+- **Causa-raiz**: Não havia mecanismo de isolamento — o agente executava comandos diretamente no shell do host.
+- **Solução**: Usar `use_build_container: true` no `prd.json` para stacks que exigem instalação pesada. Um container Docker temporário é criado no setup e removido ao final do projeto. O README documenta as dependências para quem quiser rodar nativamente.
+- **Regra**: "Nunca instale runtimes, compiladores ou pacotes nativos na máquina do usuário. Use Docker de build temporário."
+- **Projeto**: bp-drug-analysis (retrospectiva) | **Data**: 2026-03-14
 
 ### UI/Design: Dev implementando páginas sem ler o Design System
 - **Problema**: Dev implementa telas usando classes Tailwind genéricas (`bg-gray-800`, `text-white`) em vez das variáveis CSS do Design System. Resultado: interface parece "HTML puro" sem estilização do PRD.

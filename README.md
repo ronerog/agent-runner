@@ -219,6 +219,7 @@ agent-runner/
 │   │   └── learner.md         # Extracts patterns → agent-brain.md
 │   ├── prompts/               # RALPH LOOP: orchestrator, instructions, plan, execute, learn, resume, inject
 │   └── scripts/               # start.sh, start-r.sh, agent_run.sh, git_commit.sh, run_checks.sh
+│                              # docker_build_env.sh — temporary build container management
 │                              # rstudio-setup.md — RStudio integration guide
 │
 └── workspace/
@@ -256,11 +257,12 @@ The Architect chooses the ideal stack for each project. The agent is fluent in a
 
 ## Requirements
 
-- **Node.js 18+** and **Yarn** (for JS/TS projects)
-- **Runtime for the chosen stack** (Python, Go, Rust, R, etc. — as needed per project)
-- **R 4.1+** and **renv** (for R projects)
-- **jq** (optional — used by `run_checks.sh` to read `prd.json`)
+- **Docker Desktop** — used to create temporary build containers for stacks that require heavy runtimes (R, Go, Rust, Java, Python with C extensions). The agent never installs these on your machine.
+- **Node.js 18+** and **Yarn** (for JS/TS projects — lightweight enough to run natively)
 - **Git**
+- **jq** (optional — used by `run_checks.sh` to read `prd.json`)
+
+> **Note:** You do NOT need to install R, Go, Rust, Java, or any other heavy runtime. When the Architect selects a stack that requires one, the agent automatically creates a temporary Docker container (`use_build_container: true` in `prd.json`), runs all build/test commands inside it, and removes it when the project is done. The generated project's README documents what you'd need to install to run it natively without Docker.
 
 ---
 

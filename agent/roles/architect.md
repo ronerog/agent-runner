@@ -175,6 +175,84 @@ Java/Spring Boot (Maven):
 - FK + colunas de filtro frequente + colunas de ordenação → sempre indexadas.
 - Documente os índices no schema do PRD.
 
+## Docker de Build Temporário — Isolamento de Ambiente
+
+**Regra**: Nunca instale dependências diretamente na máquina do usuário. Use um container Docker temporário para builds e execução durante o desenvolvimento.
+
+O container é **efêmero** — existe apenas durante o desenvolvimento do projeto. O projeto em si **não é Docker-based** (a não ser que a stack exija, como Docker Compose para múltiplos serviços). O README do projeto deve documentar todas as dependências necessárias para rodar nativamente.
+
+### Quando usar `use_build_container: true`
+
+| Cenário | Exemplo | Container? |
+|---------|---------|------------|
+| Stack requer runtime não-padrão | R, Ruby, Go, Rust, Java | **Sim** |
+| Stack requer pacotes nativos/compilação | Python com scipy, pandas (C extensions) | **Sim** |
+| Stack usa apenas Node.js/TypeScript | Next.js, React, NestJS | **Não** (Node.js é leve e comum) |
+| Stack usa Python puro (sem extensões C) | Flask simples, scripts | **Não** (venv basta) |
+| Projeto já é Docker-based | docker-compose no stack | **Não** (já tem isolamento) |
+
+### Como configurar no `prd.json`
+
+```json
+{
+  "meta": {
+    "use_build_container": true,
+    "container_image": "r-base:4.5",
+    "container_name": "build-[nome-do-projeto]",
+    "container_workspace": "/workspace",
+    "container_ports": [],
+    "container_volumes": ["{app_dir}:/workspace"],
+    "container_env": {}
+  }
+}
+```
+
+**Campos:**
+- `use_build_container`: `true` para ativar isolamento. `false` ou ausente para instalar normalmente.
+- `container_image`: imagem base do Docker Hub (ex: `r-base:4.5`, `python:3.12-slim`, `golang:1.22`, `rust:1.78`).
+- `container_name`: nome do container (padrão: `build-[nome-do-projeto]`).
+- `container_workspace`: diretório de trabalho dentro do container (padrão: `/workspace`).
+- `container_ports`: portas para expor (ex: `["8787:8787"]` para RStudio, `["8000:8000"]` para API).
+- `container_volumes`: volumes montados. Sempre inclua `{app_dir}:/workspace` para o código ser acessível.
+- `container_env`: variáveis de ambiente extras para o container.
+
+### Imagens Base Recomendadas
+
+| Stack | Imagem | Notas |
+|-------|--------|-------|
+| R + tidyverse | `rocker/tidyverse:4.5` | Inclui R, tidyverse, devtools |
+| R + Quarto | `rocker/verse:4.5` | Inclui tidyverse + Quarto + LaTeX |
+| R + Shiny | `rocker/shiny-verse:4.5` | Inclui Shiny Server |
+| Python Data Science | `python:3.12-slim` | Instalar scipy/pandas via pip |
+| Go | `golang:1.22-alpine` | Leve, com compilador Go |
+| Rust | `rust:1.78-slim` | Inclui cargo e rustc |
+| Java/Spring | `eclipse-temurin:21-jdk` | OpenJDK 21 |
+| Ruby/Rails | `ruby:3.3-slim` | Instalar Rails via gem |
+
+### Regras para o Dev
+
+1. **Setup task**: criar e iniciar o container com `docker run -d` (via script `agent/scripts/docker_build_env.sh`)
+2. **Todas as tasks seguintes**: executar comandos dentro do container via `docker exec`
+3. **check_cmd, test_cmd, lint_cmd**: devem ser prefixados automaticamente com `docker exec {container_name}`
+4. **Cleanup final**: parar e remover o container + imagem ao final do projeto
+5. **README**: documentar o que precisa instalar para rodar **sem** Docker
+
+### Impacto nos Comandos de Verificação
+
+Quando `use_build_container: true`, os comandos do `meta` devem ser escritos para execução **dentro do container**:
+
+```
+# Em vez de:
+check_cmd: "Rscript -e \"source('R/functions.R')\""
+
+# Use:
+check_cmd: "docker exec build-bp-analysis Rscript -e \"source('R/functions.R')\""
+```
+
+O script `agent/scripts/docker_build_env.sh` automatiza o prefixo — o Arquiteto define os comandos "puros" e o script adiciona o wrapper.
+
+---
+
 ## Decisões de Segurança Arquitetural
 
 Toda arquitetura que você define deve contemplar segurança desde o início — não como afterthought:

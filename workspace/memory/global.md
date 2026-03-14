@@ -11,6 +11,7 @@ Este é o arquivo raiz de configuração global do ambiente. Leia sempre na inic
 - **Stack padrão**: Next.js 15 + TypeScript + Tailwind CSS + Prisma (quando aplicável)
 - **Package Manager**: `yarn` (nunca `pnpm`, nunca `npm` diretamente)
 - **Testes**: Playwright para E2E
+- **Docker de Build**: Usar `use_build_container: true` no `prd.json` para stacks que exigem runtimes pesados (R, Go, Rust, Java). Nunca instalar na máquina do usuário. Script: `agent/scripts/docker_build_env.sh`. Pré-requisito: Docker Desktop instalado no host.
 
 ## Arquitetura de Separação Motor / Projeto
 

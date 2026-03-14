@@ -81,6 +81,16 @@ Antes de executar cada tarefa, leia `task.type` e selecione o pipeline:
 > cd {app_dir} && git init
 > ```
 > Use o valor de `meta.app_dir` do `prd.json`. Isso garante que o projeto já nasce como repositório Git isolado fora do agent-runner.
+>
+> **Se `meta.use_build_container: true`:** após criar o diretório e `git init`, inicie o container de build:
+> ```bash
+> bash agent/scripts/docker_build_env.sh start {container_name} {container_image} {app_dir} {container_workspace} "{container_ports}" "{container_volumes}"
+> ```
+> A partir deste ponto, **todos os comandos de execução** (instalação de dependências, check_cmd, test_cmd, lint_cmd) devem ser executados via:
+> ```bash
+> bash agent/scripts/docker_build_env.sh exec {container_name} "comando aqui"
+> ```
+> O Dev e o QA usam o script para executar comandos dentro do container — nunca instalam nada na máquina do usuário.
 
 > **Para tipos `notebook`, `viz`, `model`, `report`, `r-script`**: Após `IMPL_READY`, execute o **Gate Estatístico** antes do Gate Técnico do QA:
 > 1. Data Scientist executa Protocolo de Validação Estatística (`agent/roles/data-scientist.md` seção "Fase VERIFY")
@@ -290,9 +300,17 @@ Execute seção "Validação Final Integrada" de `agent/roles/visual-validator.m
 - Execute essas tasks
 - Repita a Validação Final
 
+### Cleanup do Container de Build *(apenas se `meta.use_build_container: true`)*
+
+Antes de declarar o projeto concluído, pare e remova o container de build:
+```bash
+bash agent/scripts/docker_build_env.sh stop {container_name}
+```
+Isso remove o container e libera recursos. A imagem base permanece em cache local do Docker para reutilização futura.
+
 ### Declarar Projeto Concluído
 
-Só após **ambos os gates passarem** → execute Fase LEARN GLOBAL (`agent/prompts/learn.md` Ciclo Profundo).
+Só após **ambos os gates passarem** (e cleanup do container, se aplicável) → execute Fase LEARN GLOBAL (`agent/prompts/learn.md` Ciclo Profundo).
 
 ---
 

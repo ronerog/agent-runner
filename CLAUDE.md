@@ -133,6 +133,18 @@ Atualize `workspace/memory/agent-brain.md` com padrões, anti-padrões e aprendi
 
 ---
 
+## Passo 5 — Cleanup (SEMPRE ao final)
+
+Remova artefatos temporários que acumulam entre sessões:
+
+```bash
+rm -rf .claude/worktrees/
+```
+
+Worktrees são cópias temporárias criadas por subagentes durante a execução. Se não forem removidos, acumulam indefinidamente.
+
+---
+
 ## Compatibilidade de Modelos
 
 Funciona com qualquer modelo. Para modelos com contexto limitado: leia apenas "Hot Rules" do `agent-brain.md` (10 regras). Re-injete contexto a cada 5 tasks. Acione Manager após 25 trocas (não 40).

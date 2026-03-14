@@ -50,6 +50,14 @@ Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os pr
 - Tratar todos os erros explicitamente (`if err != nil`)
 - `go.sum` deve ser commitado junto com `go.mod`
 
+### R
+- `renv::init(bare=TRUE)` + `.Rprofile` condicional (`if (file.exists("renv/activate.R"))`)
+- `data.table` para datasets > 100k linhas — nunca `dplyr` para > 1M
+- `tableone::CreateTableOne` requer `data.frame`, não `data.table`
+- `testthat` source paths relativos ao diretório do test file, não ao projeto
+- `lmerTest` sobrepõe `lme4::lmer` — carregar lmerTest DEPOIS de lme4 para ter p-valores Satterthwaite
+- Check_cmd R no bash: usar `[.]R$` em vez de `\\.R$` (escaping duplo causa erros)
+
 *(Esta seção cresce com o uso — o Learner adiciona regras por linguagem conforme aprende)*
 
 ---
@@ -690,10 +698,21 @@ run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
 |---------|-------|------|---------|------------|------------|--------------|
 | wedding-platform | Next.js 15 + Django 5 + PostgreSQL + Redis + Docker | 2026-03-12 | 33 | 33 | 0 | Multi-tenant subdomain routing via Next.js middleware; Django custom User with email auth; UUID primary keys on all models; JWT in localStorage with axios interceptors |
 | wedding-saas | Next.js 15 + Django 4.2 + PostgreSQL + Redis + MinIO | 2026-03-12 | 33 | 11 | 0 | Django models conflict resolution; TypeScript baseUrl deprecation; Component architecture with cva; Multi-environment Django settings; Agent behavior patterns (low-cost shortcuts) |
+| bp-drug-analysis | R 4.5 + data.table + lme4/lmerTest + ggplot2 + Quarto | 2026-03-14 | 9 | 9 | 0 | Primeiro projeto de bioestatística/R; data.table processa 2M registros sem problemas; LMM com lme4 ajusta em ~34s para 2M obs; renv init(bare=TRUE) precisa de .Rprofile condicional; check_cmd em R precisa de escaping cuidadoso no bash |
 
 ---
 
 ## Notas de Auto-Melhoria
+
+### 2026-03-14 — Round 4: Primeiro Projeto R/Bioestatística
+Projeto bp-drug-analysis executado com sucesso (9/9 tasks). Aprendizados:
+- **renv init(bare=TRUE)**: o .Rprofile deve ter `if (file.exists("renv/activate.R"))` para não quebrar antes do renv ser inicializado
+- **check_cmd em R no bash**: usar `[.]R$` em vez de `\\.R$` para evitar problemas de escaping duplo (bash + R)
+- **data.table para grandes datasets**: fread/fwrite e syntax `:=` funcionam perfeitamente para 2M registros sem necessidade de Spark
+- **lme4::lmer com lmerTest**: ajustou modelo misto com 2M obs e 50 grupos em ~34 segundos no Windows
+- **tableone**: CreateTableOne precisa de data.frame, não data.table — converter com as.data.frame()
+- **testthat source paths**: quando o test file fica em tests/testthat/, o source para R/ precisa de `../../R/`
+- **Projetos sem UI**: fluxo funciona bem com has_ui: false — Designer dispensado, pipeline simplificado
 
 ### 2026-03-13 — Round 3: Visual Validation System
 Diagnóstico pós-projeto wedding-platform revelou falhas sistêmicas na qualidade visual. Mudanças aplicadas:

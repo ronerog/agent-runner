@@ -15,15 +15,15 @@ dist/
 .gemini/*.json
 .gemini/*.key
 
-# Workspace / Per-project planning artifacts (generated, not committed)
-/workspace/*/prd.json
-/workspace/*/PRD.md
-/workspace/*/requirements.md
-/workspace/*/design-system.md
+# Workspace / Per-project directories (generated per project, never committed)
+# Ignora qualquer pasta de projeto em workspace/ (nome dinâmico)
+# Mantém apenas memory/ e requirements/ que têm regras próprias abaixo
+/workspace/*
+!/workspace/memory/
+!/workspace/requirements/
 /workspace/state.json
 
 # Workspace / Legacy files
-/workspace/PRD.md
 /workspace/requirements/*
 !/workspace/requirements/global_instructions.md
 
@@ -36,3 +36,4 @@ dist/
 .DS_Store
 Thumbs.db
 .claude/settings.local.json
+.claude/worktrees/

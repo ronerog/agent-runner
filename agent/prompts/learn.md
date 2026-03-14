@@ -70,7 +70,15 @@ Se identificar que um papel (analyst, dev, qa, etc.) precisa de uma regra nova p
 
 Crie `workspace/memory/snapshots/[projeto]-final.md` usando o template em `agent/prompts/snapshot_template.md`.
 
-### 6. Informar Usuário
+### 6. Cleanup de Artefatos Temporários
+
+```bash
+rm -rf .claude/worktrees/
+```
+
+Worktrees são cópias temporárias criadas por subagentes. Acumulam entre sessões se não removidos.
+
+### 7. Informar Usuário
 
 ```
 Projeto [nome] concluído.

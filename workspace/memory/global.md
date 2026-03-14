@@ -64,9 +64,23 @@ Ao iniciar trabalho em qualquer projeto, crie `workspace/memory/[nome-do-projeto
 4. Bugs assíncronos ou de build já resolvidos (para não repetir)
 5. Bibliotecas instaladas ou removidas com motivo
 
+## Compatibilidade de Modelos
+
+O Agent Runner funciona com **qualquer modelo de IA**. A tabela abaixo ajuda a entender o que esperar:
+
+| Capacidade do Modelo | Exemplos | Adaptação |
+|---------------------|---------|-----------|
+| Alta (> 100k context) | Claude Opus, GPT-4, Gemini Pro 1.5 | Sem restrições — pode ler agent-brain completo |
+| Média (32-100k context) | Claude Sonnet, GPT-4o, Gemini Flash | Leia apenas Hot Rules + Anti-Padrões do agent-brain |
+| Baixa (< 32k context) | Claude Haiku, GPT-3.5, modelos locais | Leia apenas Hot Rules. Re-injeção a cada 3 tasks |
+
+**Independente do modelo**: o fluxo PLAN → EXECUTE → LEARN é idêntico. A diferença é apenas no volume de contexto carregado.
+
 ## Leitura Obrigatória em Cada Sessão
 
-1. `workspace/memory/agent-brain.md` (PRIMEIRO — sempre)
+1. `workspace/memory/agent-brain.md` — leia completo na primeira sessão do projeto. Em sessões subsequentes: Hot Rules + Anti-Padrões + seção da stack (PRIMEIRO — sempre)
 2. `workspace/memory/snapshots/latest.md` (se existir)
 3. `workspace/memory/global.md` (este arquivo)
 4. `workspace/memory/[projeto].md` (se houver projeto ativo)
+
+> **Para modelos com contexto limitado**: leia apenas "Hot Rules" do agent-brain.md (10 regras, ~15 linhas). As demais seções são consultadas sob demanda.

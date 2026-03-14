@@ -209,6 +209,18 @@ Antes de finalizar, verifique item por item:
 - [ ] `workspace/[projeto]/requirements.md` foi criado
 - [ ] `workspace/[projeto]/PRD.md` foi criado com todas as seções
 
+### Guardrails do PLAN (para qualquer modelo)
+
+> **NÃO PULE O PLAN.** Modelos que pulam o planejamento gastam mais tokens em debugging e refatoração do que gastaram planejando. O PLAN é investimento, não custo.
+
+Antes de finalizar o PLAN, verifique:
+1. O `prd.json` tem seção `meta` com TODOS os campos preenchidos?
+2. Cada task tem `type`, `instructions` (auto-suficiente), e `done_when` (testável)?
+3. Se `has_ui: true`: existe task `ui-setup` ANTES de qualquer `ui-screen`?
+4. A primeira task é `setup`? A última inclui `test` ou `docs`?
+
+Se qualquer resposta for "não" → corrija ANTES de iniciar EXECUTE.
+
 Ao concluir, informe:
 **"Planejamento concluído. Stack: [stack]. [N] tarefas geradas para [nome do projeto]. Iniciando execução da Tarefa 1."**
 

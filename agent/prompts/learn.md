@@ -5,26 +5,19 @@ Execute após cada tarefa (Ciclo Rápido) e ao final de cada projeto (Ciclo Prof
 
 ---
 
-## Ciclo Rápido (Após Cada Tarefa — máximo 30 segundos mental)
+## Ciclo Rápido (Após Cada Tarefa)
 
-Responda mentalmente estas 3 perguntas:
+> **Regra**: Se não aprendeu nada novo → **silêncio total** (zero tokens). Se aprendeu → documente com a profundidade necessária para que o aprendizado seja útil no futuro.
 
-1. **Houve algum erro inesperado durante a tarefa?**
-   - Sim → Documente em `workspace/memory/[projeto].md` no formato:
-     ```
-     - [ERRO] Task [id]: [descrição do erro] → [como foi resolvido]
-     ```
+Responda mentalmente estas 3 perguntas (NÃO gere texto para as perguntas — vá direto à ação):
 
-2. **O erro é recorrente (já vi isso antes) ou impactante (custou muito tempo)?**
-   - Sim → Adicione entrada em `workspace/memory/agent-brain.md` (veja formato abaixo).
+1. **Houve erro inesperado?** → Sim: documente em `workspace/memory/[projeto].md` com problema + causa + solução
+2. **Erro é recorrente ou custou > 2 tentativas?** → Sim: crie entrada completa em `agent-brain.md` (Problema, Causa-raiz, Solução, Regra)
+3. **Decisão técnica não-óbvia?** → Sim: documente em `workspace/memory/[projeto].md` com decisão + motivo
 
-3. **Tomei alguma decisão técnica significativa não óbvia?**
-   - Sim → Documente em `workspace/memory/[projeto].md`:
-     ```
-     - [DECISÃO] Task [id]: [decisão tomada] | [motivo]
-     ```
+**Se "não" para todas as 3: NÃO GERE OUTPUT. Silêncio = eficiência. Vá direto para a próxima tarefa.**
 
-Se a resposta for "não" para todas as 3: **não gere output**. Continue para a próxima tarefa. Economize tokens.
+> **Qualidade > brevidade**: Quando há algo a documentar, documente com profundidade suficiente para ser útil. Um aprendizado mal documentado é pior do que nenhum — será ignorado nas próximas sessões.
 
 ---
 

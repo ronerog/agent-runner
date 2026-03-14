@@ -5,7 +5,7 @@ A pasta `workspace/requirements/` é onde o agente atua como "Analista/PM/PO" do
 ## O Que Esperar Desta Pasta:
 Sempre que o agente iniciar as atividades do Agent Runner por um `/agent-runner` para iniciar um projeto zero, ele deve pensar se o PRD original gerado é raso.
 
-O Agente DEVE criar um arquivo `workspace/requirements/[nome-do-projeto].md` para cada projeto em `apps/` documentando a lista extensa de RFCs (Requisitos Funcionais) enumerados, RNFs (Requisitos não-funcionais) enumerados e um pequeno Backlog do Futuro, baseado no escopo e no objetivo geral do software.
+O Agente DEVE criar um arquivo `workspace/[nome-do-projeto]/requirements.md` para cada projeto documentando a lista extensa de RFCs (Requisitos Funcionais) enumerados, RNFs (Requisitos não-funcionais) enumerados e um pequeno Backlog do Futuro, baseado no escopo e no objetivo geral do software.
 
 **Exemplo Prático**: Se o projeto for um "Saas de Clínica Médica", o agente logo de cara criará na pasta requirements:
 - `[RF01] O sistema deve permitir o cadastro de médicos`.

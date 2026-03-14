@@ -1,9 +1,23 @@
 # Agent Brain — Memória Acumulada do Agent Runner
 
 Este arquivo é a **memória viva do agente**, acumulada ao longo de TODOS os projetos executados.
-É diferente da memória de projeto (`workspace/memory/[projeto].md`), que é específica por projeto.
 
-**LEIA ESTE ARQUIVO ANTES DE QUALQUER AÇÃO.** É aqui que vive a sabedoria empírica do agente.
+**LEIA ESTE ARQUIVO ANTES DE QUALQUER AÇÃO.** Para economizar tokens: leia as seções "Hot Rules", "Regras Absolutas" e "Anti-Padrões Conhecidos". As seções de Stack Expertise são lidas apenas quando relevante para a stack do projeto ativo.
+
+---
+
+## Hot Rules (TOP 10 — leia SEMPRE, todo modelo, toda sessão)
+
+1. **Stack é decisão do Arquiteto** — não hardcode stack padrão
+2. **Planejamento primeiro** — sem prd.json, não há EXECUTE
+3. **Uma tarefa por vez** — nunca implemente múltiplas tarefas simultaneamente
+4. **check_cmd vem do prd.json** — nunca invente comandos de verificação
+5. **Design System antes de UI** — `design-system.md` é pré-requisito para qualquer tela
+6. **TODOs e placeholders proibidos** — todo código entregue deve funcionar
+7. **Commitar após cada tarefa** — progresso incremental e reversível
+8. **Se travar 3x** → documente, marque `blocked`, avance
+9. **Economia de tokens** — leia apenas `task.instructions` + `done_when` por tarefa
+10. **Releia anti-padrões a cada 5 tasks** — previna drift de contexto
 
 ---
 
@@ -684,8 +698,8 @@ run_cmd:   "Rscript -e \"quarto::quarto_render('analysis/report.qmd')\""
 ### 2026-03-13 — Round 3: Visual Validation System
 Diagnóstico pós-projeto wedding-platform revelou falhas sistêmicas na qualidade visual. Mudanças aplicadas:
 - **Novo papel**: `agent/roles/visual-validator.md` — inspetor de conformidade visual
-- **Designer**: agora produz `workspace/design-system.md` como artefato obrigatório (contrato visual)
-- **Dev**: obrigado a ler `workspace/design-system.md` antes de qualquer tarefa de UI
+- **Designer**: agora produz `workspace/[projeto]/design-system.md` como artefato obrigatório (contrato visual)
+- **Dev**: obrigado a ler `workspace/[projeto]/design-system.md` antes de qualquer tarefa de UI
 - **QA**: adicionados gate visual (`visual_check_cmd`), Checkpoint de Conformidade a cada 3 UI tasks, e Checklist de Qualidade Visual na conclusão
 - **execute.md**: adicionados Passo 4.5 (visual check), Passo 7.5 (checkpoint PRD), e Fase de Validação Final Integrada
 - **plan.md**: `has_ui` e `visual_check_cmd` adicionados ao schema do `meta`; Designer obrigado a criar `design-system.md` antes do task breakdown; ordem das tarefas atualizada com globals.css e componentes base antes de telas

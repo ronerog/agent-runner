@@ -15,20 +15,22 @@ dist/
 .gemini/*.json
 .gemini/*.key
 
-# Apps Subprojects
-# Only keep the apps directory structure, not the projects inside
-/apps/*
-!/apps/.gitkeep
-
-# Workspace / Operational files
-/workspace/PRD.md
+# Workspace / Per-project planning artifacts (generated, not committed)
+/workspace/*/prd.json
+/workspace/*/PRD.md
+/workspace/*/requirements.md
+/workspace/*/design-system.md
 /workspace/state.json
+
+# Workspace / Legacy files
+/workspace/PRD.md
 /workspace/requirements/*
 !/workspace/requirements/global_instructions.md
+
+# Workspace / Memory (keep only global files)
 /workspace/memory/*
 !/workspace/memory/global.md
 !/workspace/memory/agent-brain.md
-workspace/prd.json
 
 # Tools and Editor files
 .DS_Store

@@ -1,7 +1,7 @@
 Ao receber este comando com o caminho/nome do projeto e descrição das tasks em $ARGUMENTS, execute o Modo INJECT do Agent Runner.
 
 Formato esperado: `<caminho-ou-nome> — <descrição das tasks>`
-Exemplo: `apps/meu-projeto — Adicionar endpoint de estatísticas de usuário e corrigir bug no login`
+Exemplo: `~/projects/meu-projeto — Adicionar endpoint de estatísticas de usuário e corrigir bug no login`
 
 Leia e execute `agent/prompts/inject.md` imediatamente.
 

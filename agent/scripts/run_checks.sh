@@ -1,25 +1,30 @@
 #!/bin/bash
 # run_checks.sh - Verificações de integridade do Agent Runner
-# Os comandos são lidos da seção "meta" do workspace/prd.json
+# Os comandos são lidos da seção "meta" do workspace/[projeto]/prd.json
 # Não há nenhum comando hardcoded — tudo vem da stack definida pelo Arquiteto
 
 echo "=== Agent Runner — Verificações de Integridade ==="
 
-if [ ! -f "workspace/prd.json" ]; then
-    echo "Aviso: workspace/prd.json não encontrado. Verificação ignorada."
+# Encontrar prd.json em qualquer subdiretório de workspace/
+PRD_FILE=$(find workspace/ -maxdepth 2 -name "prd.json" -not -path "workspace/memory/*" 2>/dev/null | head -1)
+
+if [ -z "$PRD_FILE" ]; then
+    echo "Aviso: Nenhum prd.json encontrado em workspace/*/. Verificação ignorada."
     exit 0
 fi
+
+echo "Usando: $PRD_FILE"
 
 # Lê os comandos da seção meta do prd.json (requer jq)
 if ! command -v jq &> /dev/null; then
     echo "Aviso: 'jq' não encontrado. Não é possível ler os comandos do prd.json automaticamente."
-    echo "Instale jq ou execute os comandos manualmente conforme definido em workspace/prd.json > meta"
+    echo "Instale jq ou execute os comandos manualmente conforme definido em $PRD_FILE > meta"
     exit 0
 fi
 
-CHECK_CMD=$(jq -r '.meta.check_cmd // empty' workspace/prd.json)
-TEST_CMD=$(jq -r '.meta.test_cmd // empty' workspace/prd.json)
-LINT_CMD=$(jq -r '.meta.lint_cmd // empty' workspace/prd.json)
+CHECK_CMD=$(jq -r '.meta.check_cmd // empty' "$PRD_FILE")
+TEST_CMD=$(jq -r '.meta.test_cmd // empty' "$PRD_FILE")
+LINT_CMD=$(jq -r '.meta.lint_cmd // empty' "$PRD_FILE")
 
 # Check principal (type check, compile check, etc.)
 if [ -n "$CHECK_CMD" ]; then
@@ -43,7 +48,6 @@ if [ -n "$LINT_CMD" ] && [ "$LINT_CMD" != "null" ]; then
     LINT_EXIT=$?
     if [ $LINT_EXIT -ne 0 ]; then
         echo "AVISO: Erros de lint encontrados. Corrija antes de continuar."
-        # Lint não é fatal por padrão — ajuste se necessário
     else
         echo "[LINT] ✓ Lint passou"
     fi

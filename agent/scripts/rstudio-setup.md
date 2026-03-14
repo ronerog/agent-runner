@@ -31,7 +31,7 @@ bash agent/scripts/start-r.sh
 ```bash
 claude "$(cat agent/prompts/inject.md)
 
-/inject apps/meu-projeto — Adicionar análise de regressão logística para predição de readmissão"
+/inject ~/projects/meu-projeto — Adicionar análise de regressão logística para predição de readmissão"
 ```
 
 ---
@@ -48,7 +48,7 @@ Positron é o novo IDE da Posit (substituto do RStudio), baseado em VS Code:
 ## Estrutura Recomendada para Projetos R
 
 ```
-apps/meu-projeto-r/
+~/projects/meu-projeto-r/
 ├── README.md
 ├── meu-projeto.Rproj       # arquivo de projeto RStudio
 ├── renv.lock               # lockfile de dependências R

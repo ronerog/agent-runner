@@ -21,10 +21,14 @@ Como Gestor de Sessão, sua missão é garantir que a "alma" do Agent Runner nã
 ## Gatilho de Ativação
 
 Ative proativamente quando:
-- A conversa ultrapassar ~50 trocas de mensagens
+- A conversa ultrapassar ~40 trocas de mensagens (não espere 50)
 - Você começar a contradizer decisões que tomou anteriormente
 - O mesmo erro aparecer 3 vezes seguidas (sinal de contexto corrompido)
 - O usuário reportar que você "esqueceu" algo que foi combinado
+- A qualidade do código implementado cair visivelmente (sinais: imports duplicados, lógica circular, variáveis não definidas)
+- **Modelos com contexto limitado**: ative após 25 trocas em vez de 40
+
+> **Para modelos simples**: Se você sente que "não lembra" o que foi feito antes, este é o sinal. Gere snapshot IMEDIATAMENTE.
 
 ## Protocolo de Consolidação
 

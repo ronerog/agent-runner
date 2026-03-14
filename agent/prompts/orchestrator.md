@@ -208,6 +208,47 @@ Se a nova sessão precisar perguntar algo → o snapshot falhou.
 
 ---
 
+## Budget de Contexto por Role (economia de tokens)
+
+O Orchestrator injeta **apenas** o contexto listado — nada mais. Contexto extra desperdiça tokens sem melhorar qualidade.
+
+| Role | Máximo de Contexto | O que NÃO injetar |
+|------|--------------------|-------------------|
+| Dev | `task.instructions` + agent-brain (Hot Rules + seção da stack do projeto) + design-system (se UI) | PRD completo, tasks anteriores, código de outros arquivos |
+| QA | `task.done_when` (1 campo) + `meta.check_cmd` (1 campo) | Instructions, PRD, design-system (exceto visual check) |
+| Visual Validator | `design-system.md` + arquivo implementado | PRD completo, agent-brain |
+| Learner | Erros desta task (somente) | PRD, código, tasks anteriores |
+| Manager | `prd.json` (meta + status) + `[projeto].md` | Código fonte, design-system |
+
+> **Regra de ouro**: se o contexto que você está prestes a ler NÃO está na coluna "Máximo de Contexto" acima, NÃO o leia. Tokens economizados = mais tarefas completadas antes do context overflow.
+
+---
+
+## Guardrails para Modelos Simples
+
+Modelos menores (Haiku, GPT-3.5, Gemini Flash, Llama) tendem a falhar de formas previsíveis. O Orchestrator aplica estas proteções:
+
+| Falha Comum | Proteção |
+|------------|----------|
+| Pular Fase PLAN e ir direto para código | INIT verifica se prd.json existe. Sem prd.json → PLAN obrigatório |
+| Implementar múltiplas tasks de uma vez | execute.md força `status: "in_progress"` em UMA task antes de implementar |
+| Não executar check_cmd | QA gate é bloqueante — sem QA_PASS, o commit não acontece |
+| Esquecer o Design System em tarefas UI | Checkpoint: `design-system.md` é lido ANTES de cada task ui-* |
+| Inventar comandos de verificação | check_cmd vem do prd.json — hardcoded no PLAN, nunca inventado no EXECUTE |
+| Perder contexto após muitas trocas | Manager ativado automaticamente após 40 trocas (proativo, não reativo) |
+| Gerar code com TODOs e placeholders | Dev role proíbe explicitamente — QA bloqueia se detectar |
+| Replanejar no meio do projeto | prd.json é imutável — só adiciona tasks, nunca altera ou deleta |
+
+### Protocolo de Re-Injeção de Contexto
+
+A cada 5 tarefas completadas, o modelo DEVE reler:
+1. `meta` do prd.json (refresh dos comandos de verificação)
+2. Seção "Anti-Padrões Conhecidos" do agent-brain.md (refresh das regras)
+
+Isso previne drift de contexto em sessões longas sem custo excessivo de tokens.
+
+---
+
 ## Anti-Patterns de Orquestração (Nunca Faça)
 
 | Anti-Pattern | Sintoma | Correção |
@@ -219,3 +260,5 @@ Se a nova sessão precisar perguntar algo → o snapshot falhou.
 | **Cascading failure** | QA falha → Dev corrige → QA falha diferente → loop | Após 3 falhas distintas → Escalation Matrix |
 | **Orphaned task** | Nova task adicionada sem `rf` vinculado | Toda nova task no prd.json deve ter `rf` |
 | **Plan drift** | Replanejar tarefas durante execute | prd.json é imutável (só adiciona, nunca altera ou deleta) |
+| **Token bloat** | Reler PRD inteiro a cada task | Budget de Contexto acima — leia apenas o necessário |
+| **Skipped PLAN** | Modelo vai direto para código sem prd.json | INIT bloqueia — sem prd.json não há EXECUTE |

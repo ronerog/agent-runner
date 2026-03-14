@@ -72,11 +72,18 @@ Nenhum novo padrão identificado nesta sessão.
 
 ---
 
-## Instrução de Retomada
+## Instrução de Retomada (para qualquer modelo, incluindo os mais simples)
 
-Agent Runner: ao iniciar nova conversa, leia este arquivo antes de qualquer ação.
-1. Leia `workspace/[projeto]/prd.json` — identifique primeira task com status `pending` ou `in_progress`
-2. Leia `task.type` → selecione o pipeline correto (orchestrator.md)
-3. Execute **sem fazer perguntas**. O contexto acima é completo.
+Agent Runner: ao iniciar nova conversa, execute EXATAMENTE estes passos:
+
+```
+PASSO 1: Leia este snapshot (você já está lendo)
+PASSO 2: Leia workspace/memory/agent-brain.md — seção "Hot Rules" apenas
+PASSO 3: Leia workspace/[projeto]/prd.json — encontre primeira task com status "pending" ou "in_progress"
+PASSO 4: Leia task.type → consulte pipeline em agent/prompts/orchestrator.md
+PASSO 5: Execute a tarefa sem fazer perguntas. O contexto acima é completo.
+```
 
 Se `escalacao_pendente` não for null: resolva a escalação antes de retomar o loop normal.
+
+> **NÃO faça perguntas ao usuário.** Se algo estiver ambíguo, assuma a interpretação mais razoável e execute.

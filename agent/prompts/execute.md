@@ -9,11 +9,20 @@ Execute este loop para **cada tarefa** do `workspace/[projeto]/prd.json`, uma de
 ## Passo 0 — Releitura de Contexto (SEMPRE ao entrar nesta fase)
 
 Antes de executar qualquer tarefa, garanta que você leu:
-1. `workspace/memory/agent-brain.md` — anti-padrões e padrões acumulados
+1. `workspace/memory/agent-brain.md` — leia completo na primeira entrada nesta fase. Nas releituras (re-injeção a cada 5 tasks), foque em: Hot Rules, Anti-Padrões Conhecidos, e seção da stack do projeto.
 2. `workspace/memory/snapshots/latest.md` — se existir, estado da sessão anterior
 3. `workspace/memory/global.md` — configuração do ambiente (`PROJECTS_ROOT`)
 
-> Modelos fracos: não pule este passo. Sem `agent-brain.md`, você repetirá erros já documentados.
+> **ATENÇÃO — todos os modelos**: Sem `agent-brain.md`, você repetirá erros já documentados. Este passo é **obrigatório** e **não pode ser pulado**, mesmo que pareça economizar tempo.
+
+### Checkpoint de Re-Injeção (a cada 5 tasks completadas)
+
+A cada 5 tarefas completadas, execute este refresh:
+1. Releia `meta` do `prd.json` (comandos podem ter sido esquecidos)
+2. Releia "Anti-Padrões Conhecidos" do `agent-brain.md`
+3. Se > 40 trocas na sessão → acione Manager para snapshot
+
+> Isso previne drift de contexto em sessões longas.
 
 ---
 
@@ -97,7 +106,7 @@ SINAL DE ENTRADA → ORCHESTRATOR
 ### Passo 2 — Carregar Contexto Mínimo (por tipo)
 
 **Sempre carregue:**
-1. `workspace/memory/agent-brain.md` — anti-padrões globais
+1. `workspace/memory/agent-brain.md` — Hot Rules + seção de anti-padrões + seção da stack do projeto
 2. Campo `instructions` da tarefa atual — auto-suficiente
 
 **Adicione se o tipo exigir:**
@@ -289,15 +298,19 @@ Só após **ambos os gates passarem** → execute Fase LEARN GLOBAL (`agent/prom
 
 ## Regras de Ferro
 
-| Regra | Detalhe |
-|-------|---------|
-| Leia `meta` primeiro | Comandos de verificação vêm do `prd.json`, nunca hardcoded |
-| Roteie por `task.type` | Nunca execute passos irrelevantes para o tipo da tarefa |
-| Uma tarefa por vez | Nunca implemente duas simultaneamente |
-| Não pule tarefas | Bloqueio → marque `blocked`, documente, continue |
-| `completed` é permanente | Nunca altere |
-| Nova tarefa? | Adicione ao final do `prd.json` com ID maior + `rf` vinculado |
-| Contexto saturando? | Acione Manager **ANTES** que a qualidade degrede (> 40 trocas) |
-| Design System é gate | Sem `design-system.md`: nenhuma task `ui-*` pode iniciar |
-| Validação Final é obrigatória | Nunca declare projeto concluído sem ela |
-| Escalation é do Orchestrator | Após 3 falhas, siga a Escalation Matrix — não improvise |
+> **Para modelos simples**: Se só lembrar 3 regras, lembre: (1) UMA tarefa por vez, (2) execute check_cmd SEMPRE, (3) commite após cada task.
+
+| # | Regra | Detalhe |
+|---|-------|---------|
+| 1 | **Leia `meta` primeiro** | Comandos de verificação vêm do `prd.json`, nunca hardcoded |
+| 2 | **Roteie por `task.type`** | Nunca execute passos irrelevantes para o tipo da tarefa |
+| 3 | **Uma tarefa por vez** | Nunca implemente duas simultaneamente |
+| 4 | **Não pule tarefas** | Bloqueio → marque `blocked`, documente, continue |
+| 5 | **`completed` é permanente** | Nunca altere status de task completada |
+| 6 | **Nova tarefa?** | Adicione ao final do `prd.json` com ID maior + `rf` vinculado |
+| 7 | **Contexto saturando?** | Acione Manager **ANTES** que a qualidade degrede (> 40 trocas) |
+| 8 | **Design System é gate** | Sem `design-system.md`: nenhuma task `ui-*` pode iniciar |
+| 9 | **Validação Final obrigatória** | Nunca declare projeto concluído sem ela |
+| 10 | **Escalation é do Orchestrator** | Após 3 falhas, siga a Escalation Matrix — não improvise |
+| 11 | **Re-injeção a cada 5 tasks** | Releia meta + anti-padrões para prevenir drift |
+| 12 | **Releia instructions ANTES de implementar** | 2 campos curtos vs. refazer trabalho errado |

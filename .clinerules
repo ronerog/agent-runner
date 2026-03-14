@@ -130,6 +130,12 @@ Atualize `workspace/memory/agent-brain.md` com padrões, anti-padrões e aprendi
 
 ---
 
+## Compatibilidade de Modelos
+
+Funciona com qualquer modelo. Para modelos com contexto limitado: leia apenas "Hot Rules" do `agent-brain.md` (10 regras). Re-injete contexto a cada 5 tasks. Acione Manager após 25 trocas (não 40).
+
+---
+
 ## Time de 9 Papéis
 
 | Papel | Arquivo | Quando |
